@@ -1,5 +1,8 @@
-dev:
+dev-java:
 	cd backend && dotenv -- mvn spring-boot:run
+
+dev-vite:
+	cd frontend && npm run dev
 
 docker-build:
 	docker build -t chatapp-backend ./backend
