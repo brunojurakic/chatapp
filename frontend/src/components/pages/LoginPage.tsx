@@ -42,7 +42,7 @@ const LoginPage = () => {
           </div>
         </div>
 
-        <Card>
+        <Card className="shadow-lg border-2">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl text-center">Sign in</CardTitle>
             <CardDescription className='text-center'>

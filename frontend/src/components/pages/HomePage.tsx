@@ -77,7 +77,7 @@ const HomePage = () => {
           </div>
 
           <div className="max-w-md mx-auto">
-            <Card>
+            <Card className="shadow-lg border-2">
               <CardHeader className="text-center">
                 <CardTitle className="text-lg">Your Account</CardTitle>
               </CardHeader>
