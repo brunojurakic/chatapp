@@ -1,14 +1,21 @@
 package com.chatapp.backend.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.chatapp.backend.filter.JwtAuthenticationFilter;
+import com.chatapp.backend.service.UserService;
+import com.chatapp.backend.util.JwtUtil;
 
 @Configuration
 @EnableWebSecurity
@@ -17,14 +24,21 @@ public class SecurityConfig {
     @Value("${FRONTEND_URL}")
     private String frontendUrl;
 
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                .maximumSessions(1)
-                .maxSessionsPreventsLogin(false)
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/", "/api/auth/**", "/oauth2/**", "/api/public/**").permitAll()
@@ -34,7 +48,8 @@ public class SecurityConfig {
                 .loginPage("/login")
                 .successHandler(customAuthenticationSuccessHandler())
                 .failureHandler(customAuthenticationFailureHandler())
-            );
+            )
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -42,7 +57,15 @@ public class SecurityConfig {
     @Bean
     public AuthenticationSuccessHandler customAuthenticationSuccessHandler() {
         return (request, response, authentication) -> {
-            response.sendRedirect(frontendUrl + "/home");
+            OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
+            String email = oauth2User.getAttribute("email");
+            String name = oauth2User.getAttribute("name");
+            String picture = oauth2User.getAttribute("picture");
+            String googleId = oauth2User.getAttribute("sub");
+
+            userService.findOrCreateUser(email, name, picture, googleId);
+            String token = jwtUtil.generateToken(email, name, picture, googleId);
+            response.sendRedirect(frontendUrl + "/auth/callback?token=" + token);
         };
     }
 

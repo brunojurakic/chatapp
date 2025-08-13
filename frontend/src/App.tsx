@@ -4,6 +4,7 @@ import { ThemeProvider } from './components/theme-provider';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './components/pages/LoginPage';
 import HomePage from './components/pages/HomePage';
+import AuthCallback from './components/pages/AuthCallback';
 
 const App = () => {
   return (
@@ -12,6 +13,7 @@ const App = () => {
         <Router>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
             <Route 
               path="/home" 
               element={
