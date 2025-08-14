@@ -5,6 +5,27 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chatapp</title>
+    <style>
+      html, body { background: oklch(0.145 0 0); }
+      html.light, body.light { background: oklch(0.985 0 0); }
+      html.dark, body.dark { background: oklch(0.145 0 0); }
+    </style>
+    <script>
+      (function() {
+        try {
+          var storageKey = 'chatapp-ui-theme';
+          var theme = localStorage.getItem(storageKey);
+          var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var html = document.documentElement;
+          html.classList.remove('light', 'dark');
+          if (theme === 'dark' || (!theme && systemDark)) {
+            html.classList.add('dark');
+          } else {
+            html.classList.add('light');
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
