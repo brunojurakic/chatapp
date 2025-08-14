@@ -6,6 +6,8 @@ interface User {
   email: string;
   picture?: string;
   authenticated: boolean;
+  username?: string | null;
+  displayName?: string | null;
 }
 
 interface AuthContextType {
@@ -13,6 +15,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: () => void;
   logout: () => void;
+  refreshUser: () => Promise<void>;
   setToken: (token: string) => void;
 }
 
@@ -57,7 +60,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       if (response.ok) {
         const userData = await response.json();
-        setUser(userData);
+        setUser({
+          name: userData.displayName || userData.name,
+          email: userData.email,
+          picture: userData.picture,
+          authenticated: true,
+          username: userData.username || null,
+          displayName: userData.displayName || userData.name,
+        });
       } else {
         removeToken();
         setUser(null);
@@ -70,6 +80,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(false);
     }
   }, []);
+
+  const refreshUser = async () => {
+    await checkAuth();
+  };
 
   useEffect(() => {
     checkAuth();
@@ -105,7 +119,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isLoading,
     login,
     logout,
-    setToken,
+  setToken,
+  refreshUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

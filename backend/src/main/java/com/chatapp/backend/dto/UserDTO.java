@@ -5,6 +5,8 @@ public class UserDTO {
     private String email;
     private String picture;
     private boolean authenticated;
+    private String username;
+    private String displayName;
     
     public UserDTO() {}
     
@@ -13,6 +15,15 @@ public class UserDTO {
         this.email = email;
         this.picture = picture;
         this.authenticated = authenticated;
+    }
+
+    public UserDTO(String name, String email, String picture, boolean authenticated, String username, String displayName) {
+        this.name = name;
+        this.email = email;
+        this.picture = picture;
+        this.authenticated = authenticated;
+        this.username = username;
+        this.displayName = displayName;
     }
     
     // Getters and Setters
@@ -46,5 +57,21 @@ public class UserDTO {
     
     public void setAuthenticated(boolean authenticated) {
         this.authenticated = authenticated;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 }

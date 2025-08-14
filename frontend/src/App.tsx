@@ -2,8 +2,10 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './components/theme-provider';
 import ProtectedRoute from './components/ProtectedRoute';
+import SetupRoute from './components/SetupRoute';
 import LoginPage from './components/pages/LoginPage';
 import HomePage from './components/pages/HomePage';
+import SetupPage from './components/pages/SetupPage';
 import AuthCallback from './components/pages/AuthCallback';
 
 const App = () => {
@@ -21,6 +23,14 @@ const App = () => {
                   <HomePage />
                 </ProtectedRoute>
               } 
+            />
+            <Route 
+              path="/setup"
+              element={
+                <SetupRoute>
+                  <SetupPage />
+                </SetupRoute>
+              }
             />
             <Route 
               path="/" 

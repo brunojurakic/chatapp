@@ -27,6 +27,12 @@ public class User {
     @Column(nullable = false)
     private String name;
     
+    @Column(name = "username", unique = true)
+    private String username;
+
+    @Column(name = "display_name")
+    private String displayName;
+    
     @Column(name = "profile_picture_url")
     private String profilePictureUrl;
     
@@ -58,6 +64,15 @@ public class User {
         this.name = name;
         this.profilePictureUrl = profilePictureUrl;
         this.googleId = googleId;
+    }
+
+    public User(String email, String name, String profilePictureUrl, String googleId, String username, String displayName) {
+        this.email = email;
+        this.name = name;
+        this.profilePictureUrl = profilePictureUrl;
+        this.googleId = googleId;
+        this.username = username;
+        this.displayName = displayName;
     }
     
     // Getters and Setters
@@ -115,5 +130,21 @@ public class User {
     
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 }

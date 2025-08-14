@@ -2,9 +2,14 @@ import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Header from '@/components/header';
+import { Navigate } from 'react-router-dom';
 
 const HomePage = () => {
   const { user } = useAuth();
+
+  if (user && (!user.username || !user.displayName)) {
+    return <Navigate to="/setup" replace />;
+  }
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
@@ -38,7 +43,7 @@ const HomePage = () => {
                   </Avatar>
                   <div className="flex-1 space-y-1">
                     <p className="text-sm font-medium">{user?.name}</p>
-                    <p className="text-xs text-muted-foreground">{user?.email}</p>
+                    <p className="text-xs text-muted-foreground">{user?.username ? `@${user.username}` : user?.email}</p>
                   </div>
                 </div>
               </CardContent>
