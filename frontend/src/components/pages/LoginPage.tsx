@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from "@/components/ui/button";
@@ -6,15 +6,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ModeToggle } from "@/components/mode-toggle";
 import { MessageCircle, AlertCircle, Loader2 } from 'lucide-react';
 
+
 const LoginPage = () => {
   const { user, login, isLoading } = useAuth();
   const [searchParams] = useSearchParams();
   const [error, setError] = useState<string | null>(null);
+  const [starting, setStarting] = useState(false);
+  const [showWake, setShowWake] = useState(false);
+  const wakeTimerRef = React.useRef<number | null>(null);
 
   useEffect(() => {
     if (searchParams.get('error')) {
       setError('Authentication failed. Please try again.');
     }
+    return () => {
+      if (wakeTimerRef.current) {
+        clearTimeout(wakeTimerRef.current);
+      }
+    };
   }, [searchParams]);
 
   if (isLoading) {
@@ -58,9 +67,15 @@ const LoginPage = () => {
             )}
             
             <Button 
-              onClick={login} 
+              onClick={() => {
+                if (starting) return;
+                setStarting(true);
+                wakeTimerRef.current = window.setTimeout(() => setShowWake(true), 3000);
+                login();
+              }} 
               className="w-full bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700"
               size="lg"
+              disabled={starting}
             >
               <svg
                 className="mr-2 h-5 w-5"
@@ -74,6 +89,12 @@ const LoginPage = () => {
               </svg>
               Continue with Google
             </Button>
+            {showWake && (
+              <div className="mt-3 flex items-center space-x-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Server waking up... this can take a few seconds</span>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
