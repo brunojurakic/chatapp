@@ -11,7 +11,8 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { ModeToggle } from "@/components/mode-toggle";
-import { MessageCircle, LogOut } from 'lucide-react';
+import { MessageCircle, LogOut, Settings } from 'lucide-react';
+import { Link, Navigate } from 'react-router-dom';
 
 const Header: React.FC = () => {
   const { user, logout } = useAuth();
@@ -55,6 +56,13 @@ const Header: React.FC = () => {
                     </p>
                   </div>
                 </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <Link to={'/settings'}>
+                  <DropdownMenuItem className='cursor-pointer'>
+                    <Settings className='mr-2 h-4 w-4'/>
+                    <span>Settings</span>
+                  </DropdownMenuItem>
+                </Link>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={logout} className="text-red-600 dark:text-red-400 cursor-pointer">
                   <LogOut className="mr-2 h-4 w-4" />
