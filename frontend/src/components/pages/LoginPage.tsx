@@ -90,9 +90,9 @@ const LoginPage = () => {
               Continue with Google
             </Button>
             {showWake && (
-              <div className="mt-3 flex items-center space-x-2 text-sm text-muted-foreground">
+              <div className="mt-3 flex w-full items-center justify-center space-x-2 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Server waking up... this can take a few seconds</span>
+                <span className="text-center">Server waking up... this can take a few seconds</span>
               </div>
             )}
           </CardContent>
