@@ -41,13 +41,17 @@ public class AuthController {
 
             User user = userService.findByEmail(email).orElse(null);
             String username = null;
+            String userPicture = picture;
             if (user != null) {
                 username = user.getUsername();
+                if (user.getProfilePictureUrl() != null && !user.getProfilePictureUrl().isEmpty()) {
+                    userPicture = user.getProfilePictureUrl();
+                }
             }
 
             UserDTO userDTO = new UserDTO(user != null && user.getDisplayName() != null ? user.getDisplayName() : name,
                                           email,
-                                          picture,
+                                          userPicture,
                                           true,
                                           username,
                                           user != null && user.getDisplayName() != null ? user.getDisplayName() : name,

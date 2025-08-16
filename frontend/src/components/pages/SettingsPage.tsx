@@ -89,18 +89,20 @@ const SettingsPage = () => {
         throw new Error('No auth token');
       }
 
-      const requestBody = {
-        displayName: formData.displayName,
-        themePreference: formData.themePreference,
-      };
+      const formDataToSend = new FormData();
+      formDataToSend.append('displayName', formData.displayName);
+      formDataToSend.append('themePreference', formData.themePreference);
+      
+      if (formData.profilePictureFile) {
+        formDataToSend.append('profilePicture', formData.profilePictureFile);
+      }
 
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/settings`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(requestBody),
+        body: formDataToSend,
       });
 
       if (response.ok) {
@@ -110,7 +112,7 @@ const SettingsPage = () => {
         
         await refreshUser();
         
-        if (previewUrl && !formData.profilePictureFile) {
+        if (previewUrl) {
           URL.revokeObjectURL(previewUrl);
           setPreviewUrl(null);
         }
@@ -132,7 +134,8 @@ const SettingsPage = () => {
 
   const hasChanges = 
     formData.displayName !== (user?.displayName || user?.name || '') ||
-    formData.themePreference !== (user?.themePreference || 'system');
+    formData.themePreference !== (user?.themePreference || 'system') ||
+    formData.profilePictureFile !== null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -170,13 +173,12 @@ const SettingsPage = () => {
                       size="sm"
                       onClick={() => fileInputRef.current?.click()}
                       className="flex items-center gap-2"
-                      disabled={true}
                     >
                       <Camera className="h-4 w-4" />
                       Change Picture
                     </Button>
                     <p className="text-xs text-muted-foreground">
-                      Profile picture upload coming soon
+                      Recommended: Square image, max 5MB
                     </p>
                   </div>
                 </div>

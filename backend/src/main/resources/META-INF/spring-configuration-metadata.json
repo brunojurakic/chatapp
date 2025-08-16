@@ -10,6 +10,11 @@
       "type": "java.lang.Integer",
       "description": "JWT token expiration time in seconds.",
       "defaultValue": 86400
+    },
+    {
+      "name": "vercel.blob.token",
+      "type": "java.lang.String",
+      "description": "Vercel Blob storage API token for file uploads."
     }
   ]
 }
