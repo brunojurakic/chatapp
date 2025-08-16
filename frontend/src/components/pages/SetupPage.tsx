@@ -44,7 +44,7 @@ const SetupPage: React.FC = () => {
 
     setLoading(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/setup`, {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/setup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

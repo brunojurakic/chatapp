@@ -94,7 +94,7 @@ const SettingsPage = () => {
         themePreference: formData.themePreference,
       };
 
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/settings`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/settings`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
