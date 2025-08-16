@@ -41,7 +41,11 @@ public class UserService {
         if (existingUser.isPresent()) {
             User user = existingUser.get();
             user.setName(name);
-            user.setProfilePictureUrl(profilePictureUrl);
+            if (user.getProfilePictureUrl() == null || 
+                user.getProfilePictureUrl().isEmpty() || 
+                user.getProfilePictureUrl().contains("googleusercontent.com")) {
+                user.setProfilePictureUrl(profilePictureUrl);
+            }
             return updateUser(user);
         } else {
             return createUser(email, name, profilePictureUrl, googleId);
