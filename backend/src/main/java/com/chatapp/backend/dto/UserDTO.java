@@ -7,6 +7,7 @@ public class UserDTO {
     private boolean authenticated;
     private String username;
     private String displayName;
+    private String themePreference;
     
     public UserDTO() {}
     
@@ -24,6 +25,17 @@ public class UserDTO {
         this.authenticated = authenticated;
         this.username = username;
         this.displayName = displayName;
+        this.themePreference = "system";
+    }
+
+    public UserDTO(String name, String email, String picture, boolean authenticated, String username, String displayName, String themePreference) {
+        this.name = name;
+        this.email = email;
+        this.picture = picture;
+        this.authenticated = authenticated;
+        this.username = username;
+        this.displayName = displayName;
+        this.themePreference = themePreference;
     }
     
     // Getters and Setters
@@ -73,5 +85,13 @@ public class UserDTO {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    public String getThemePreference() {
+        return themePreference;
+    }
+
+    public void setThemePreference(String themePreference) {
+        this.themePreference = themePreference;
     }
 }

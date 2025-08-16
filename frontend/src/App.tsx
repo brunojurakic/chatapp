@@ -1,11 +1,13 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './components/theme-provider';
+import { Toaster } from './components/ui/sonner';
 import ProtectedRoute from './components/ProtectedRoute';
 import SetupRoute from './components/SetupRoute';
 import LoginPage from './components/pages/LoginPage';
 import HomePage from './components/pages/HomePage';
 import SetupPage from './components/pages/SetupPage';
+import SettingsPage from './components/pages/SettingsPage';
 import AuthCallback from './components/pages/AuthCallback';
 
 const App = () => {
@@ -33,6 +35,14 @@ const App = () => {
               }
             />
             <Route 
+              path="/settings" 
+              element={
+                <ProtectedRoute>
+                  <SettingsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
               path="/" 
               element={<Navigate to="/home" replace />} 
             />
@@ -51,6 +61,7 @@ const App = () => {
             />
           </Routes>
         </Router>
+        <Toaster />
       </AuthProvider>
     </ThemeProvider>
   );

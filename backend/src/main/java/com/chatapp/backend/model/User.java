@@ -35,6 +35,9 @@ public class User {
     
     @Column(name = "profile_picture_url")
     private String profilePictureUrl;
+
+    @Column(name = "theme_preference")
+    private String themePreference = "system";
     
     @Column(name = "google_id", unique = true)
     private String googleId;
@@ -146,5 +149,13 @@ public class User {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    public String getThemePreference() {
+        return themePreference;
+    }
+
+    public void setThemePreference(String themePreference) {
+        this.themePreference = themePreference;
     }
 }

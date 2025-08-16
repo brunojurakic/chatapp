@@ -8,6 +8,7 @@ interface User {
   authenticated: boolean;
   username?: string | null;
   displayName?: string | null;
+  themePreference?: string;
 }
 
 interface AuthContextType {
@@ -67,6 +68,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           authenticated: true,
           username: userData.username || null,
           displayName: userData.displayName || userData.name,
+          themePreference: userData.themePreference || 'system',
         });
       } else {
         removeToken();
