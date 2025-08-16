@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ModeToggle } from "@/components/mode-toggle";
 import { MessageCircle, LogOut, Settings } from 'lucide-react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const Header: React.FC = () => {
   const { user, logout } = useAuth();
