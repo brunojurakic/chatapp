@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -78,13 +79,13 @@ public class VercelBlobService {
                     if (jsonResponse.has("url")) {
                         return jsonResponse.get("url").asText();
                     }
-                } catch (Exception e) {
+                } catch (JsonProcessingException e) {
                 }
             }
             
             return blobUrl;
 
-        } catch (Exception e) {
+        } catch (IOException | RuntimeException e) {
             throw new IOException("Failed to upload file: " + e.getMessage(), e);
         }
     }
