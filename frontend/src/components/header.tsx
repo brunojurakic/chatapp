@@ -27,17 +27,26 @@ const Header: React.FC = () => {
   return (
     <nav className="border-b">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center space-x-4">
-            <Link to="/home" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
-            <div className="flex items-center justify-center w-8 h-8 rounded-md bg-emerald-100 dark:bg-emerald-900/20">
-              <FlowLogo className="h-5 w-5 text-emerald-600 dark:text-emerald-400" size={20} />
-            </div>
-            <h1 className="text-xl font-bold">Flow</h1>
+        <div className="flex items-center h-16">
+          <div className="flex-1">
+            <Link to="/home" className="flex items-center space-x-3 hover:opacity-80 transition-opacity w-fit">
+              <div className="flex items-center justify-center w-8 h-8 rounded-md bg-emerald-100 dark:bg-emerald-900/20">
+                <FlowLogo className="h-5 w-5 text-emerald-600 dark:text-emerald-400" size={20} />
+              </div>
+              <h1 className="text-xl font-bold">Flow</h1>
             </Link>
-            <Link to="/friends" className="text-sm font-medium text-muted-foreground hover:text-foreground">Friends</Link>
           </div>
-          <div className="flex items-center space-x-4">
+          
+          <div className="flex items-center justify-center flex-1">
+            <Link to="/friends" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+              <Button variant="ghost" size="sm" className="flex items-center space-x-2">
+                <Users className="h-4 w-4" />
+                <span className="hidden sm:inline">Friends</span>
+              </Button>
+            </Link>
+          </div>
+          
+          <div className="flex items-center space-x-4 flex-1 justify-end">
             <ModeToggle />
             
             <DropdownMenu>
