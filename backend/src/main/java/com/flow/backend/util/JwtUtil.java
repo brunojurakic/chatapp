@@ -1,4 +1,4 @@
-package com.chatapp.backend.util;
+package com.flow.backend.util;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -10,7 +10,7 @@ import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.chatapp.backend.config.JwtProperties;
+import com.flow.backend.config.JwtProperties;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

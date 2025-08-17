@@ -1,12 +1,12 @@
-package com.chatapp.backend.service;
+package com.flow.backend.service;
 
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.chatapp.backend.model.User;
-import com.chatapp.backend.repository.UserRepository;
+import com.flow.backend.model.User;
+import com.flow.backend.repository.UserRepository;
 
 @Service
 public class UserService {

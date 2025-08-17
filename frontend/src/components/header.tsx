@@ -11,7 +11,8 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { ModeToggle } from "@/components/mode-toggle";
-import { MessageCircle, LogOut, Settings } from 'lucide-react';
+import { FlowLogo } from "@/components/ui/flow-logo";
+import { LogOut, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Header: React.FC = () => {
@@ -26,12 +27,12 @@ const Header: React.FC = () => {
     <nav className="border-b">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex items-center space-x-3">
+          <Link to="/home" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
             <div className="flex items-center justify-center w-8 h-8 rounded-md bg-emerald-100 dark:bg-emerald-900/20">
-              <MessageCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+              <FlowLogo className="h-5 w-5 text-emerald-600 dark:text-emerald-400" size={20} />
             </div>
-            <h1 className="text-xl font-bold">ChatApp</h1>
-          </div>
+            <h1 className="text-xl font-bold">Flow</h1>
+          </Link>
           
           <div className="flex items-center space-x-4">
             <ModeToggle />

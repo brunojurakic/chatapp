@@ -12,7 +12,7 @@ import AuthCallback from './components/pages/AuthCallback';
 
 const App = () => {
   return (
-    <ThemeProvider defaultTheme="system" storageKey="chatapp-ui-theme">
+    <ThemeProvider defaultTheme="system" storageKey="flow-ui-theme">
       <AuthProvider>
         <Router>
           <Routes>

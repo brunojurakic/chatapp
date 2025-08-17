@@ -1,4 +1,4 @@
-package com.chatapp.backend.dto;
+package com.flow.backend.dto;
 
 public class UserDTO {
     private String name;

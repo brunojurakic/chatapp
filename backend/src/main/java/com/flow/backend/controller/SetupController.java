@@ -1,4 +1,4 @@
-package com.chatapp.backend.controller;
+package com.flow.backend.controller;
 
 import java.util.Map;
 
@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.chatapp.backend.dto.UserDTO;
-import com.chatapp.backend.model.User;
-import com.chatapp.backend.service.UserService;
-import com.chatapp.backend.util.JwtUtil;
+import com.flow.backend.dto.UserDTO;
+import com.flow.backend.model.User;
+import com.flow.backend.service.UserService;
+import com.flow.backend.util.JwtUtil;
 
 @RestController
 @RequestMapping("/api/setup")

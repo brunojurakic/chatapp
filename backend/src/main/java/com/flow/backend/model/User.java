@@ -1,4 +1,4 @@
-package com.chatapp.backend.model;
+package com.flow.backend.model;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

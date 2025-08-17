@@ -1,4 +1,4 @@
-package com.chatapp.backend.config;
+package com.flow.backend.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

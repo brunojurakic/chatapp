@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="flow-icon-title">
+  <title id="flow-icon-title">Flow</title>
+  <defs>
+    <linearGradient id="flowGradient" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <path d="M128 32
+           C96 96, 64 128, 64 176
+           A64 64 0 0 0 192 176
+           C192 128, 160 96, 128 32Z"
+        fill="url(#flowGradient)"/>
+</svg>

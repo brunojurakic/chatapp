@@ -1,4 +1,4 @@
-package com.chatapp.backend.config;
+package com.flow.backend.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,9 +14,9 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.chatapp.backend.filter.JwtAuthenticationFilter;
-import com.chatapp.backend.service.UserService;
-import com.chatapp.backend.util.JwtUtil;
+import com.flow.backend.filter.JwtAuthenticationFilter;
+import com.flow.backend.service.UserService;
+import com.flow.backend.util.JwtUtil;
 
 @Configuration
 @EnableWebSecurity

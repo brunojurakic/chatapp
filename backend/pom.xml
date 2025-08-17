@@ -8,11 +8,11 @@
 		<version>3.5.4</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.chatapp</groupId>
-	<artifactId>backend</artifactId>
+	<groupId>com.flow</groupId>
+	<artifactId>flow-backend</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>backend</name>
-	<description>Demo project for Spring Boot</description>
+	<name>flow-backend</name>
+	<description>Flow - Connect and communicate seamlessly</description>
 	<url/>
 	<licenses>
 		<license/>

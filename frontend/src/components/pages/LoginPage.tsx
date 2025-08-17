@@ -4,7 +4,8 @@ import { useAuth } from '@/hooks/use-auth';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ModeToggle } from "@/components/mode-toggle";
-import { MessageCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { FlowLogo } from "@/components/ui/flow-logo";
+import { AlertCircle, Loader2 } from 'lucide-react';
 
 
 const LoginPage = () => {
@@ -47,8 +48,9 @@ const LoginPage = () => {
       <div className="w-full max-w-md space-y-8">
         <div className="flex flex-col items-center space-y-4">
           <div className="flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/20">
-            <MessageCircle className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
+            <FlowLogo className="h-8 w-8 text-emerald-600 dark:text-emerald-400" size={32} />
           </div>
+          <h1 className="text-3xl font-bold text-center">Welcome to Flow</h1>
         </div>
 
         <Card className="shadow-lg border-2">

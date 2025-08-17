@@ -1,4 +1,4 @@
-package com.chatapp.backend.service;
+package com.flow.backend.service;
 
 import java.io.IOException;
 import java.util.UUID;
