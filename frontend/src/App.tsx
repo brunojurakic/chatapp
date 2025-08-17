@@ -9,6 +9,7 @@ import HomePage from './components/pages/HomePage';
 import SetupPage from './components/pages/SetupPage';
 import SettingsPage from './components/pages/SettingsPage';
 import AuthCallback from './components/pages/AuthCallback';
+import FriendsPage from './components/pages/FriendsPage';
 
 const App = () => {
   return (
@@ -39,6 +40,14 @@ const App = () => {
               element={
                 <ProtectedRoute>
                   <SettingsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/friends" 
+              element={
+                <ProtectedRoute>
+                  <FriendsPage />
                 </ProtectedRoute>
               } 
             />

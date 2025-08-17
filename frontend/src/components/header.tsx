@@ -14,6 +14,7 @@ import { ModeToggle } from "@/components/mode-toggle";
 import { FlowLogo } from "@/components/ui/flow-logo";
 import { LogOut, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Users } from 'lucide-react';
 
 const Header: React.FC = () => {
   const { user, logout } = useAuth();
@@ -27,13 +28,15 @@ const Header: React.FC = () => {
     <nav className="border-b">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <Link to="/home" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+          <div className="flex items-center space-x-4">
+            <Link to="/home" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
             <div className="flex items-center justify-center w-8 h-8 rounded-md bg-emerald-100 dark:bg-emerald-900/20">
               <FlowLogo className="h-5 w-5 text-emerald-600 dark:text-emerald-400" size={20} />
             </div>
             <h1 className="text-xl font-bold">Flow</h1>
-          </Link>
-          
+            </Link>
+            <Link to="/friends" className="text-sm font-medium text-muted-foreground hover:text-foreground">Friends</Link>
+          </div>
           <div className="flex items-center space-x-4">
             <ModeToggle />
             
@@ -58,6 +61,12 @@ const Header: React.FC = () => {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <Link to={'/friends'}>
+                  <DropdownMenuItem className='cursor-pointer'>
+                    <Users className='mr-2 h-4 w-4' />
+                    <span>Friends</span>
+                  </DropdownMenuItem>
+                </Link>
                 <Link to={'/settings'}>
                   <DropdownMenuItem className='cursor-pointer'>
                     <Settings className='mr-2 h-4 w-4'/>
