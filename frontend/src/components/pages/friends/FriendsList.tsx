@@ -68,6 +68,14 @@ export default function FriendsList() {
 
   useEffect(() => {
     loadFriends()
+    const onAccepted = () => loadFriends()
+    const onRemoved = () => loadFriends()
+    window.addEventListener("friend:accepted", onAccepted)
+    window.addEventListener("friend:removed", onRemoved)
+    return () => {
+      window.removeEventListener("friend:accepted", onAccepted)
+      window.removeEventListener("friend:removed", onRemoved)
+    }
   }, [])
 
   return (

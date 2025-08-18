@@ -43,9 +43,14 @@ export default function OutgoingRequests() {
       await fetchOutgoing()
       setLoading(false)
     })()
-    const handler = () => fetchOutgoing()
-    window.addEventListener("friend:sent", handler)
-    return () => window.removeEventListener("friend:sent", handler)
+    const onSent = () => fetchOutgoing()
+    const onRejected = () => fetchOutgoing()
+    window.addEventListener("friend:sent", onSent)
+    window.addEventListener("friend:rejected", onRejected)
+    return () => {
+      window.removeEventListener("friend:sent", onSent)
+      window.removeEventListener("friend:rejected", onRejected)
+    }
   }, [user, isLoading])
 
   return (

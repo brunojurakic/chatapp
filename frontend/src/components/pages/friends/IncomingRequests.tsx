@@ -57,6 +57,13 @@ export default function IncomingRequests() {
           { headers: { Authorization: `Bearer ${token}` } },
         )
         if (r.ok) setRequests(await r.json())
+        try {
+          window.dispatchEvent(
+            new CustomEvent("friend:accepted", { detail: { friendId: id } }),
+          )
+        } catch {
+          // ignore
+        }
         toast.success("Friend request accepted")
       } else {
         const txt = await res.text()
@@ -83,6 +90,13 @@ export default function IncomingRequests() {
           { headers: { Authorization: `Bearer ${token}` } },
         )
         if (r.ok) setRequests(await r.json())
+        try {
+          window.dispatchEvent(
+            new CustomEvent("friend:rejected", { detail: { requesterId: id } }),
+          )
+        } catch {
+          // ignore
+        }
         toast.success("Friend request rejected")
       } else {
         const txt = await res.text()

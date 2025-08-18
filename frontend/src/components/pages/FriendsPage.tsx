@@ -34,6 +34,34 @@ export default function FriendsPage() {
         setIncomingCount(0)
       }
     })()
+    const refresh = () => {
+      (async () => {
+        const token = localStorage.getItem("jwt_token")
+        if (!token) return
+        try {
+          const res = await fetch(
+            `${import.meta.env.VITE_BACKEND_URL}/api/friends/requests`,
+            { headers: { Authorization: `Bearer ${token}` } },
+          )
+          if (res.ok) {
+            const list = await res.json()
+            setIncomingCount(Array.isArray(list) ? list.length : 0)
+          }
+        } catch {
+          /* ignore */
+        }
+      })()
+    }
+    window.addEventListener("friend:sent", refresh)
+    window.addEventListener("friend:accepted", refresh)
+    window.addEventListener("friend:rejected", refresh)
+    window.addEventListener("friend:removed", refresh)
+    return () => {
+      window.removeEventListener("friend:sent", refresh)
+      window.removeEventListener("friend:accepted", refresh)
+      window.removeEventListener("friend:rejected", refresh)
+      window.removeEventListener("friend:removed", refresh)
+    }
   }, [user, isLoading])
   return (
     <div className="min-h-screen bg-background">

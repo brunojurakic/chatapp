@@ -55,9 +55,13 @@ public class FriendService {
                     .findFirstByRequesterAndRecipientOrderByCreatedAtDesc(requester, recipient);
         if (existing.isPresent()) {
             FriendRequest er = existing.get();
-            if ("PENDING".equals(er.getStatus()) || "ACCEPTED".equals(er.getStatus())) {
-                if ("PENDING".equals(er.getStatus())) return er;
-                throw new IllegalArgumentException("Already friends");
+            if ("PENDING".equals(er.getStatus())) {
+                return er;
+            }
+            if ("ACCEPTED".equals(er.getStatus())) {
+                if (friendshipRepository.existsBetween(requester, recipient)) {
+                    throw new IllegalArgumentException("Already friends");
+                }
             }
         }
 
