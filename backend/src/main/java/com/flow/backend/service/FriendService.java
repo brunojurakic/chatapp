@@ -1,5 +1,14 @@
 package com.flow.backend.service;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.flow.backend.dto.FriendRequestDTO;
 import com.flow.backend.dto.OutgoingRequestDTO;
 import com.flow.backend.model.FriendRequest;
@@ -7,13 +16,6 @@ import com.flow.backend.model.Friendship;
 import com.flow.backend.model.User;
 import com.flow.backend.repository.FriendRequestRepository;
 import com.flow.backend.repository.FriendshipRepository;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class FriendService {
@@ -21,6 +23,8 @@ public class FriendService {
   @Autowired private FriendRequestRepository friendRequestRepository;
 
   @Autowired private FriendshipRepository friendshipRepository;
+
+  @Autowired private com.flow.backend.repository.ChatMessageRepository chatMessageRepository;
 
   @Autowired private UserService userService;
 
@@ -156,7 +160,9 @@ public class FriendService {
     User friend = friendOpt.get();
     var maybe = friendshipRepository.findBetween(requester, friend);
     if (maybe.isEmpty()) throw new IllegalArgumentException("Friendship not found");
-    friendshipRepository.delete(maybe.get());
+    var friendship = maybe.get();
+    chatMessageRepository.deleteByFriendshipId(friendship.getId());
+    friendshipRepository.delete(friendship);
   }
 
   public java.util.Optional<java.util.UUID> getFriendshipIdBetween(
