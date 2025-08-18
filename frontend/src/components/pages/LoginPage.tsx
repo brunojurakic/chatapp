@@ -1,42 +1,47 @@
-import React, { useEffect, useState } from 'react';
-import { Navigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '@/hooks/use-auth';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ModeToggle } from "@/components/mode-toggle";
-import { FlowLogo } from "@/components/ui/flow-logo";
-import { AlertCircle, Loader2 } from 'lucide-react';
-
+import React, { useEffect, useState } from "react"
+import { Navigate, useSearchParams } from "react-router-dom"
+import { useAuth } from "@/hooks/use-auth"
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { ModeToggle } from "@/components/mode-toggle"
+import { FlowLogo } from "@/components/ui/flow-logo"
+import { AlertCircle, Loader2 } from "lucide-react"
 
 const LoginPage = () => {
-  const { user, login, isLoading } = useAuth();
-  const [searchParams] = useSearchParams();
-  const [error, setError] = useState<string | null>(null);
-  const [starting, setStarting] = useState(false);
-  const [showWake, setShowWake] = useState(false);
-  const wakeTimerRef = React.useRef<number | null>(null);
+  const { user, login, isLoading } = useAuth()
+  const [searchParams] = useSearchParams()
+  const [error, setError] = useState<string | null>(null)
+  const [starting, setStarting] = useState(false)
+  const [showWake, setShowWake] = useState(false)
+  const wakeTimerRef = React.useRef<number | null>(null)
 
   useEffect(() => {
-    if (searchParams.get('error')) {
-      setError('Authentication failed. Please try again.');
+    if (searchParams.get("error")) {
+      setError("Authentication failed. Please try again.")
     }
     return () => {
       if (wakeTimerRef.current) {
-        clearTimeout(wakeTimerRef.current);
+        clearTimeout(wakeTimerRef.current)
       }
-    };
-  }, [searchParams]);
+    }
+  }, [searchParams])
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
-    );
+    )
   }
 
   if (user) {
-    return <Navigate to="/home" replace />;
+    return <Navigate to="/home" replace />
   }
 
   return (
@@ -44,11 +49,14 @@ const LoginPage = () => {
       <div className="absolute top-4 right-4">
         <ModeToggle />
       </div>
-      
+
       <div className="w-full max-w-md space-y-8">
         <div className="flex flex-col items-center space-y-4">
           <div className="flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/20">
-            <FlowLogo className="h-8 w-8 text-emerald-600 dark:text-emerald-400" size={32} />
+            <FlowLogo
+              className="h-8 w-8 text-emerald-600 dark:text-emerald-400"
+              size={32}
+            />
           </div>
           <h1 className="text-3xl font-bold text-center">Welcome to Flow</h1>
         </div>
@@ -56,7 +64,7 @@ const LoginPage = () => {
         <Card className="shadow-lg border-2">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl text-center">Sign in</CardTitle>
-            <CardDescription className='text-center'>
+            <CardDescription className="text-center">
               Sign in to your account to continue
             </CardDescription>
           </CardHeader>
@@ -67,14 +75,17 @@ const LoginPage = () => {
                 <p className="text-sm text-destructive">{error}</p>
               </div>
             )}
-            
-            <Button 
+
+            <Button
               onClick={() => {
-                if (starting) return;
-                setStarting(true);
-                wakeTimerRef.current = window.setTimeout(() => setShowWake(true), 3000);
-                login();
-              }} 
+                if (starting) return
+                setStarting(true)
+                wakeTimerRef.current = window.setTimeout(
+                  () => setShowWake(true),
+                  3000,
+                )
+                login()
+              }}
               className="w-full bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700"
               size="lg"
               disabled={starting}
@@ -94,14 +105,16 @@ const LoginPage = () => {
             {showWake && (
               <div className="mt-3 flex w-full items-center justify-center space-x-2 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span className="text-center">Server waking up... this can take a few seconds</span>
+                <span className="text-center">
+                  Server waking up... this can take a few seconds
+                </span>
               </div>
             )}
           </CardContent>
         </Card>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default LoginPage;
+export default LoginPage

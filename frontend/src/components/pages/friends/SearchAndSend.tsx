@@ -11,7 +11,7 @@ export default function SearchAndSend() {
   const [loading, setLoading] = useState(false)
   const [sendingId, setSendingId] = useState<string | null>(null)
   const [acceptingId, setAcceptingId] = useState<string | null>(null)
-  
+
   const search = async () => {
     const token = localStorage.getItem("jwt_token")
     if (!token || !query.trim()) return
@@ -21,7 +21,7 @@ export default function SearchAndSend() {
         `${
           import.meta.env.VITE_BACKEND_URL
         }/api/users/search?query=${encodeURIComponent(query.trim())}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       )
       if (res.ok) setResults(await res.json())
     } catch {
@@ -40,7 +40,7 @@ export default function SearchAndSend() {
         `${
           import.meta.env.VITE_BACKEND_URL
         }/api/friends/request?username=${encodeURIComponent(username)}`,
-        { method: "POST", headers: { Authorization: `Bearer ${token}` } }
+        { method: "POST", headers: { Authorization: `Bearer ${token}` } },
       )
       if (res.ok) {
         toast.success("Friend request sent")
@@ -69,7 +69,7 @@ export default function SearchAndSend() {
         `${
           import.meta.env.VITE_BACKEND_URL
         }/api/friends/requests/${requestId}/accept`,
-        { method: "POST", headers: { Authorization: `Bearer ${token}` } }
+        { method: "POST", headers: { Authorization: `Bearer ${token}` } },
       )
       if (res.ok) {
         toast.success("Friend request accepted")

@@ -1,141 +1,150 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useAuth } from '@/hooks/use-auth';
-import { useTheme } from '@/hooks/use-theme';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import Header from '@/components/header';
-import { Navigate } from 'react-router-dom';
-import { Label } from "@/components/ui/label";
-import { 
+import React, { useState, useRef, useEffect } from "react"
+import { useAuth } from "@/hooks/use-auth"
+import { useTheme } from "@/hooks/use-theme"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import Header from "@/components/header"
+import { Navigate } from "react-router-dom"
+import { Label } from "@/components/ui/label"
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Camera, Save, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
+} from "@/components/ui/select"
+import { Camera, Save, Loader2 } from "lucide-react"
+import { toast } from "sonner"
 
 interface SettingsFormData {
-  displayName: string;
-  profilePictureFile: File | null;
-  themePreference: 'light' | 'dark' | 'system';
+  displayName: string
+  profilePictureFile: File | null
+  themePreference: "light" | "dark" | "system"
 }
 
 const SettingsPage = () => {
-  const { user, refreshUser } = useAuth();
-  const { setTheme } = useTheme();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  const [isLoading, setIsLoading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const { user, refreshUser } = useAuth()
+  const { setTheme } = useTheme()
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const [isLoading, setIsLoading] = useState(false)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [formData, setFormData] = useState<SettingsFormData>({
-    displayName: user?.displayName || user?.name || '',
+    displayName: user?.displayName || user?.name || "",
     profilePictureFile: null,
-    themePreference: user?.themePreference as 'light' | 'dark' | 'system' || 'system',
-  });
+    themePreference:
+      (user?.themePreference as "light" | "dark" | "system") || "system",
+  })
 
   useEffect(() => {
     if (user) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        displayName: user.displayName || user.name || '',
-        themePreference: user.themePreference as 'light' | 'dark' | 'system' || 'system',
-      }));
+        displayName: user.displayName || user.name || "",
+        themePreference:
+          (user.themePreference as "light" | "dark" | "system") || "system",
+      }))
     }
-  }, [user]);
+  }, [user])
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" replace />
   }
 
   if (user && (!user.username || !user.displayName)) {
-    return <Navigate to="/setup" replace />;
+    return <Navigate to="/setup" replace />
   }
 
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
-  };
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const file = e.target.files?.[0]
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        toast.error('File size must be less than 5MB');
-        return;
+        toast.error("File size must be less than 5MB")
+        return
       }
 
-      if (!file.type.startsWith('image/')) {
-        toast.error('Please select an image file');
-        return;
+      if (!file.type.startsWith("image/")) {
+        toast.error("Please select an image file")
+        return
       }
 
-      setFormData(prev => ({ ...prev, profilePictureFile: file }));
-      
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
+      setFormData((prev) => ({ ...prev, profilePictureFile: file }))
+
+      const url = URL.createObjectURL(file)
+      setPreviewUrl(url)
     }
-  };
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+    e.preventDefault()
+    setIsLoading(true)
 
     try {
-      const token = localStorage.getItem('jwt_token');
+      const token = localStorage.getItem("jwt_token")
       if (!token) {
-        throw new Error('No auth token');
+        throw new Error("No auth token")
       }
 
-      const formDataToSend = new FormData();
-      formDataToSend.append('displayName', formData.displayName);
-      formDataToSend.append('themePreference', formData.themePreference);
-      
+      const formDataToSend = new FormData()
+      formDataToSend.append("displayName", formData.displayName)
+      formDataToSend.append("themePreference", formData.themePreference)
+
       if (formData.profilePictureFile) {
-        formDataToSend.append('profilePicture', formData.profilePictureFile);
+        formDataToSend.append("profilePicture", formData.profilePictureFile)
       }
 
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/settings`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/user/settings`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formDataToSend,
         },
-        body: formDataToSend,
-      });
+      )
 
       if (response.ok) {
-        if (formData.themePreference !== (user?.themePreference || 'system')) {
-          setTheme(formData.themePreference);
+        if (formData.themePreference !== (user?.themePreference || "system")) {
+          setTheme(formData.themePreference)
         }
-        
-        await refreshUser();
-        
+
+        await refreshUser()
+
         if (previewUrl) {
-          URL.revokeObjectURL(previewUrl);
-          setPreviewUrl(null);
+          URL.revokeObjectURL(previewUrl)
+          setPreviewUrl(null)
         }
-        
-        setFormData(prev => ({ ...prev, profilePictureFile: null }));
-        
-        toast.success('Settings updated successfully!');
+
+        setFormData((prev) => ({ ...prev, profilePictureFile: null }))
+
+        toast.success("Settings updated successfully!")
       } else {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Failed to update settings');
+        const errorText = await response.text()
+        throw new Error(errorText || "Failed to update settings")
       }
     } catch (error) {
-      console.error('Settings update failed:', error);
-      toast.error('Failed to update settings. Please try again.');
+      console.error("Settings update failed:", error)
+      toast.error("Failed to update settings. Please try again.")
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
-  const hasChanges = 
-    formData.displayName !== (user?.displayName || user?.name || '') ||
-    formData.themePreference !== (user?.themePreference || 'system') ||
-    formData.profilePictureFile !== null;
+  const hasChanges =
+    formData.displayName !== (user?.displayName || user?.name || "") ||
+    formData.themePreference !== (user?.themePreference || "system") ||
+    formData.profilePictureFile !== null
 
   return (
     <div className="min-h-screen bg-background">
@@ -158,12 +167,12 @@ const SettingsPage = () => {
               <CardContent className="space-y-4">
                 <div className="flex items-center space-x-4">
                   <Avatar className="h-20 w-20">
-                    <AvatarImage 
-                      src={previewUrl || user?.picture} 
-                      alt={user?.name} 
+                    <AvatarImage
+                      src={previewUrl || user?.picture}
+                      alt={user?.name}
                     />
                     <AvatarFallback className="bg-emerald-100 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 text-xl">
-                      {user?.name ? getInitials(user.name) : 'U'}
+                      {user?.name ? getInitials(user.name) : "U"}
                     </AvatarFallback>
                   </Avatar>
                   <div className="space-y-2">
@@ -202,10 +211,12 @@ const SettingsPage = () => {
                   <Input
                     id="displayName"
                     value={formData.displayName}
-                    onChange={(e) => setFormData(prev => ({ 
-                      ...prev, 
-                      displayName: e.target.value 
-                    }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        displayName: e.target.value,
+                      }))
+                    }
                     placeholder="Enter your display name"
                     maxLength={50}
                   />
@@ -213,12 +224,12 @@ const SettingsPage = () => {
                     This is the name that will be displayed to other users.
                   </p>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="username">Username</Label>
                   <Input
                     id="username"
-                    value={user?.username ? `@${user.username}` : ''}
+                    value={user?.username ? `@${user.username}` : ""}
                     disabled
                     className="bg-muted cursor-not-allowed"
                     placeholder="No username set"
@@ -237,10 +248,13 @@ const SettingsPage = () => {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="theme">Default Theme</Label>
-                  <Select 
-                    value={formData.themePreference} 
-                    onValueChange={(value: 'light' | 'dark' | 'system') => 
-                      setFormData(prev => ({ ...prev, themePreference: value }))
+                  <Select
+                    value={formData.themePreference}
+                    onValueChange={(value: "light" | "dark" | "system") =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        themePreference: value,
+                      }))
                     }
                   >
                     <SelectTrigger>
@@ -260,8 +274,8 @@ const SettingsPage = () => {
             </Card>
 
             <div className="flex justify-end">
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={!hasChanges || isLoading}
                 className="flex items-center gap-2"
               >
@@ -270,14 +284,14 @@ const SettingsPage = () => {
                 ) : (
                   <Save className="h-4 w-4" />
                 )}
-                {isLoading ? 'Saving...' : 'Save Changes'}
+                {isLoading ? "Saving..." : "Save Changes"}
               </Button>
             </div>
           </form>
         </div>
       </main>
     </div>
-  );
-};
+  )
+}
 
-export default SettingsPage;
+export default SettingsPage

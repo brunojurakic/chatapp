@@ -13,7 +13,10 @@ export function ModeToggle() {
       setTheme("light")
     } else {
       // If system, toggle to opposite of current system preference
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
+        .matches
+        ? "dark"
+        : "light"
       setTheme(systemTheme === "dark" ? "light" : "dark")
     }
   }

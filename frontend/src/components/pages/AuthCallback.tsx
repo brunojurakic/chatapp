@@ -1,23 +1,23 @@
-import React, { useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '../../hooks/use-auth';
-import { Loader2 } from 'lucide-react';
+import React, { useEffect } from "react"
+import { useNavigate, useSearchParams } from "react-router-dom"
+import { useAuth } from "../../hooks/use-auth"
+import { Loader2 } from "lucide-react"
 
 const AuthCallback: React.FC = () => {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const { setToken } = useAuth();
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const { setToken } = useAuth()
 
   useEffect(() => {
-    const token = searchParams.get('token');
-    
+    const token = searchParams.get("token")
+
     if (token) {
-      setToken(token);
-      navigate('/home', { replace: true });
+      setToken(token)
+      navigate("/home", { replace: true })
     } else {
-      navigate('/login?error=true', { replace: true });
+      navigate("/login?error=true", { replace: true })
     }
-  }, [searchParams, setToken, navigate]);
+  }, [searchParams, setToken, navigate])
 
   return (
     <div className="flex items-center justify-center min-h-screen">
@@ -26,7 +26,7 @@ const AuthCallback: React.FC = () => {
         <p>Completing authentication...</p>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default AuthCallback;
+export default AuthCallback
