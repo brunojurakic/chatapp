@@ -116,7 +116,7 @@ export default function SearchAndSend() {
             <Input
               value={query}
               onChange={(e) => setQuery((e.target as HTMLInputElement).value)}
-              placeholder="search by name or username"
+              placeholder="name/username"
               className="rounded-l-none"
             />
           </div>
