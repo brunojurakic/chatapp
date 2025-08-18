@@ -35,7 +35,7 @@ export default function FriendsPage() {
       }
     })()
     const refresh = () => {
-      (async () => {
+      ;(async () => {
         const token = localStorage.getItem("jwt_token")
         if (!token) return
         try {

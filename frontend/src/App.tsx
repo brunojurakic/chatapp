@@ -15,6 +15,7 @@ import SetupPage from "./components/pages/SetupPage"
 import SettingsPage from "./components/pages/SettingsPage"
 import AuthCallback from "./components/pages/AuthCallback"
 import FriendsPage from "./components/pages/FriendsPage"
+import ChatPage from "./components/pages/ChatPage"
 
 const App = () => {
   return (
@@ -53,6 +54,14 @@ const App = () => {
               element={
                 <ProtectedRoute>
                   <FriendsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/chat/:id"
+              element={
+                <ProtectedRoute>
+                  <ChatPage />
                 </ProtectedRoute>
               }
             />

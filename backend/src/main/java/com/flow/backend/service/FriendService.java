@@ -139,4 +139,11 @@ public class FriendService {
         if (maybe.isEmpty()) throw new IllegalArgumentException("Friendship not found");
         friendshipRepository.delete(maybe.get());
     }
+
+    public java.util.Optional<java.util.UUID> getFriendshipIdBetween(User a, java.util.UUID friendUserId) {
+        var friendOpt = userService.findById(friendUserId);
+        if (friendOpt.isEmpty()) return java.util.Optional.empty();
+        var maybe = friendshipRepository.findBetween(a, friendOpt.get());
+        return maybe.map(f -> f.getId());
+    }
 }
