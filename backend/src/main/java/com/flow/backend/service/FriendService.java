@@ -26,6 +26,9 @@ public class FriendService {
     @Autowired
     private FriendshipRepository friendshipRepository;
 
+    @Autowired
+    private UserService userService;
+
     public List<FriendRequestDTO> getIncomingRequests(User recipient) {
         List<FriendRequest> reqs = friendRequestRepository.findByRecipientAndStatus(recipient, "PENDING");
         return reqs.stream().map(r -> new FriendRequestDTO(
@@ -95,7 +98,7 @@ public class FriendService {
     }
 
     public List<OutgoingRequestDTO> getOutgoingRequests(User requester) {
-        List<FriendRequest> reqs = friendRequestRepository.findByRequester(requester);
+        List<FriendRequest> reqs = friendRequestRepository.findByRequesterAndStatus(requester, "PENDING");
         return reqs.stream().map(r -> new OutgoingRequestDTO(
             r.getId(),
             r.getRecipient().getId(),
@@ -120,5 +123,16 @@ public class FriendService {
             return existing;
         }
         return Optional.empty();
+    }
+
+    @Transactional
+    public void removeFriend(User requester, java.util.UUID friendUserId) {
+        if (requester == null) throw new IllegalArgumentException("Not authenticated");
+        var friendOpt = userService.findById(friendUserId);
+        if (friendOpt.isEmpty()) throw new IllegalArgumentException("User not found");
+        User friend = friendOpt.get();
+        var maybe = friendshipRepository.findBetween(requester, friend);
+        if (maybe.isEmpty()) throw new IllegalArgumentException("Friendship not found");
+        friendshipRepository.delete(maybe.get());
     }
 }

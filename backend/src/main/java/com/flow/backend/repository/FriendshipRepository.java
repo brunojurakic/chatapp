@@ -19,4 +19,7 @@ public interface FriendshipRepository extends JpaRepository<Friendship, UUID> {
 
     @Query("select case when count(f)>0 then true else false end from Friendship f where (f.userA = :a and f.userB = :b) or (f.userA = :b and f.userB = :a)")
     boolean existsBetween(@Param("a") User a, @Param("b") User b);
+
+    @Query("select f from Friendship f where (f.userA = :a and f.userB = :b) or (f.userA = :b and f.userB = :a)")
+    java.util.Optional<Friendship> findBetween(@Param("a") User a, @Param("b") User b);
 }

@@ -9,7 +9,7 @@ import { useAuth } from "@/hooks/use-auth"
 
 export default function FriendsPage() {
   const { user, isLoading } = useAuth()
-  const [incomingCount, setIncomingCount] = useState<number>(2)
+  const [incomingCount, setIncomingCount] = useState<number>(0)
 
   useEffect(() => {
     ;(async () => {

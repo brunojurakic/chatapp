@@ -129,4 +129,19 @@ public class FriendController {
             return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }
     }
+
+    @org.springframework.web.bind.annotation.DeleteMapping("/{id}")
+    public ResponseEntity<?> removeFriend(@RequestHeader(value = "Authorization", required = false) String authHeader,
+                                          @PathVariable("id") UUID id) {
+        try {
+            User me = getCurrentUserFromToken(authHeader);
+            if (me == null) return ResponseEntity.status(401).body("Not authenticated");
+            friendService.removeFriend(me, id);
+            return ResponseEntity.ok(Map.of("status", "removed"));
+        } catch (IllegalArgumentException ia) {
+            return ResponseEntity.badRequest().body(Map.of("error", ia.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
+    }
 }

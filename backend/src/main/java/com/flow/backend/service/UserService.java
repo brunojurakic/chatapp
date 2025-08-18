@@ -27,6 +27,10 @@ public class UserService {
         return userRepository.findByUsername(username);
     }
 
+    public Optional<User> findById(java.util.UUID id) {
+        return userRepository.findById(id);
+    }
+
     public List<User> searchUsers(String q) {
         if (q == null || q.trim().isEmpty()) return List.of();
         return userRepository.findByUsernameContainingIgnoreCaseOrNameContainingIgnoreCase(q, q);

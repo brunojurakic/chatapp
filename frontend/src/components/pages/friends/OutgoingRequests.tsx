@@ -43,6 +43,9 @@ export default function OutgoingRequests() {
       await fetchOutgoing()
       setLoading(false)
     })()
+    const handler = () => fetchOutgoing()
+    window.addEventListener("friend:sent", handler)
+    return () => window.removeEventListener("friend:sent", handler)
   }, [user, isLoading])
 
   return (

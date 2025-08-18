@@ -54,6 +54,13 @@ export default function SearchAndSend() {
       if (res.ok) {
         toast.success("Friend request sent")
         setResults(results.filter((r) => r.username !== username))
+        try {
+          window.dispatchEvent(
+            new CustomEvent("friend:sent", { detail: { username } }),
+          )
+        } catch {
+          // ignore
+        }
       } else {
         let txt = await res.text()
         try {

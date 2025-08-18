@@ -2,6 +2,8 @@ import { useEffect, useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
 
 interface Friend {
   id: string
@@ -13,28 +15,60 @@ interface Friend {
 export default function FriendsList() {
   const [friends, setFriends] = useState<Friend[]>([])
   const [loading, setLoading] = useState(false)
-  const token = localStorage.getItem("jwt_token")
+  const [processingIds, setProcessingIds] = useState<string[]>([])
+
+  const loadFriends = async () => {
+    setLoading(true)
+    const token = localStorage.getItem("jwt_token")
+    if (!token) {
+      setLoading(false)
+      return
+    }
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/friends`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      )
+      if (res.ok) setFriends(await res.json())
+    } catch {
+      // ignore
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleUnfriend = async (friendId: string) => {
+    if (processingIds.includes(friendId)) return
+    setProcessingIds((s) => [...s, friendId])
+    try {
+      const t = localStorage.getItem("jwt_token")
+      if (!t) throw new Error("No token")
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/friends/${friendId}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${t}` },
+        },
+      )
+      if (res.ok) {
+        setFriends((prev) => prev.filter((p) => p.id !== friendId))
+        toast.success("Removed friend")
+      } else {
+        const text = await res.text().catch(() => "")
+        toast.error(text || "Could not remove friend")
+      }
+    } catch {
+      toast.error("Could not remove friend")
+    } finally {
+      setProcessingIds((s) => s.filter((id) => id !== friendId))
+    }
+  }
 
   useEffect(() => {
-    ;(async () => {
-      setLoading(true)
-      if (!token) {
-        setLoading(false)
-        return
-      }
-      try {
-        const res = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/api/friends`,
-          { headers: { Authorization: `Bearer ${token}` } },
-        )
-        if (res.ok) setFriends(await res.json())
-      } catch {
-        // ignore
-      } finally {
-        setLoading(false)
-      }
-    })()
-  }, [token])
+    loadFriends()
+  }, [])
 
   return (
     <Card className="shadow-lg border-2">
@@ -75,6 +109,20 @@ export default function FriendsList() {
                     {f.username ? `@${f.username}` : ""}
                   </div>
                 </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  size="sm"
+                  onClick={() => handleUnfriend(f.id)}
+                  aria-label={`Unfriend ${f.name}`}
+                  disabled={processingIds.includes(f.id)}
+                >
+                  {processingIds.includes(f.id) ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    "Unfriend"
+                  )}
+                </Button>
               </div>
             </div>
           ))
