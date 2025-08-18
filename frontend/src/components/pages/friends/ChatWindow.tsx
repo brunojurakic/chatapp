@@ -47,7 +47,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
     const createClient = () => {
       console.debug("Creating stomp client for conversation", conversationId)
       const sock = new SockJS(`${import.meta.env.VITE_BACKEND_URL}/ws`)
-      
+
       const client = new Client({
         webSocketFactory: () => sock,
         debug: (m: string) => console.debug("stomp:", m),
@@ -133,7 +133,9 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
           try {
             connectResolversRef.current.forEach((r) => r(true))
             connectResolversRef.current = []
-          } catch (err) { console.warn(err) }
+          } catch (err) {
+            console.warn(err)
+          }
           try {
             type StompMsg = { body: string }
             ;(
@@ -176,7 +178,9 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
       if (!connected) {
         const ok = await new Promise<boolean>((resolve) => {
           const timer = setTimeout(() => {
-            connectResolversRef.current = connectResolversRef.current.filter((r) => r !== resolver)
+            connectResolversRef.current = connectResolversRef.current.filter(
+              (r) => r !== resolver,
+            )
             resolve(false)
           }, 7000)
           const resolver = (v: boolean) => {
@@ -270,7 +274,11 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
             }}
           />
           <Button onClick={send} disabled={sendLoading || input.trim() === ""}>
-            {sendLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send"}
+            {sendLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              "Send"
+            )}
           </Button>
         </div>
       </CardContent>

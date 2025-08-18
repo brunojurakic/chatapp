@@ -12,4 +12,4 @@ docker-run:
 
 format:
 	cd frontend && npm run format
-	cd ../backend && mvn spotless:apply
+	cd backend && mvn spotless:apply
