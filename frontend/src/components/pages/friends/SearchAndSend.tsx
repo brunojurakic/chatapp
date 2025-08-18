@@ -5,9 +5,18 @@ import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
 
+interface SearchResult {
+  id: string
+  name: string
+  username?: string
+  pendingRequest?: boolean
+  incomingRequest?: boolean
+  incomingRequestId?: string
+}
+
 export default function SearchAndSend() {
   const [query, setQuery] = useState("")
-  const [results, setResults] = useState<any[]>([])
+  const [results, setResults] = useState<SearchResult[]>([])
   const [loading, setLoading] = useState(false)
   const [sendingId, setSendingId] = useState<string | null>(null)
   const [acceptingId, setAcceptingId] = useState<string | null>(null)
@@ -50,7 +59,9 @@ export default function SearchAndSend() {
         try {
           const j = JSON.parse(txt)
           txt = j.error || txt
-        } catch {}
+        } catch {
+          // skip
+        }
         toast.error(txt || "Failed to send")
       }
     } catch {
@@ -73,14 +84,15 @@ export default function SearchAndSend() {
       )
       if (res.ok) {
         toast.success("Friend request accepted")
-        // refresh search results to remove or update the user
         setResults([])
       } else {
         let txt = await res.text()
         try {
           const j = JSON.parse(txt)
           txt = j.error || txt
-        } catch {}
+        } catch {
+          // skip
+        }
         toast.error(txt || "Failed to accept")
       }
     } catch {
@@ -116,7 +128,7 @@ export default function SearchAndSend() {
         {results.length === 0 ? (
           <p className="text-muted-foreground">No users</p>
         ) : (
-          results.map((r: any) => (
+          results.map((r: SearchResult) => (
             <div
               key={r.id}
               className="flex items-center justify-between p-2 border-b last:border-b-0"
@@ -130,7 +142,9 @@ export default function SearchAndSend() {
               <div>
                 {r.incomingRequest ? (
                   <Button
-                    onClick={() => accept(r.incomingRequestId)}
+                    onClick={() => {
+                      if (r.incomingRequestId) accept(r.incomingRequestId)
+                    }}
                     disabled={acceptingId === r.incomingRequestId}
                   >
                     {acceptingId === r.incomingRequestId ? (
@@ -145,7 +159,9 @@ export default function SearchAndSend() {
                   </span>
                 ) : (
                   <Button
-                    onClick={() => send(r.username)}
+                    onClick={() => {
+                      if (r.username) send(r.username)
+                    }}
                     disabled={sendingId === r.username}
                   >
                     {sendingId === r.username ? (
