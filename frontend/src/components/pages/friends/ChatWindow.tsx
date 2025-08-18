@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "sonner"
+import { Loader2 } from "lucide-react"
 import SockJS from "sockjs-client"
 import { Client } from "@stomp/stompjs"
 
@@ -22,6 +23,8 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
   const [connected, setConnected] = useState(false)
   const clientRef = useRef<Client | null>(null)
   const subRef = useRef<unknown>(null)
+  const connectResolversRef = useRef<Array<(ok: boolean) => void>>([])
+  const [sendLoading, setSendLoading] = useState(false)
 
   useEffect(() => {
     let mounted = true
@@ -52,6 +55,12 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
         onConnect: () => {
           console.info("STOMP connected")
           setConnected(true)
+          try {
+            connectResolversRef.current.forEach((r) => r(true))
+            connectResolversRef.current = []
+          } catch (err) {
+            console.warn(err)
+          }
           try {
             subRef.current = client.subscribe(
               `/topic/chats/${conversationId}`,
@@ -122,6 +131,10 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
           console.info("STOMP reconnected")
           setConnected(true)
           try {
+            connectResolversRef.current.forEach((r) => r(true))
+            connectResolversRef.current = []
+          } catch (err) { console.warn(err) }
+          try {
             type StompMsg = { body: string }
             ;(
               client as {
@@ -151,14 +164,38 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
     }
   }
 
-  const send = () => {
+  const send = async () => {
     const token = localStorage.getItem("jwt_token")
     if (!token) {
       toast.error("Not authenticated")
       return
     }
     if (!input.trim()) return
+    setSendLoading(true)
     try {
+      if (!connected) {
+        const ok = await new Promise<boolean>((resolve) => {
+          const timer = setTimeout(() => {
+            connectResolversRef.current = connectResolversRef.current.filter((r) => r !== resolver)
+            resolve(false)
+          }, 7000)
+          const resolver = (v: boolean) => {
+            clearTimeout(timer)
+            resolve(v)
+          }
+          connectResolversRef.current.push(resolver)
+          try {
+            retryConnect()
+          } catch (e) {
+            console.warn("retryConnect failed", e)
+          }
+        })
+        if (!ok) {
+          toast.error("Could not reconnect")
+          return
+        }
+      }
+
       clientRef.current?.publish({
         destination: `/app/chats/${conversationId}/send`,
         body: input.trim(),
@@ -167,6 +204,8 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
     } catch (err) {
       console.warn(err)
       toast.error("Could not send message")
+    } finally {
+      setSendLoading(false)
     }
   }
 
@@ -230,8 +269,8 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
               if (e.key === "Enter") send()
             }}
           />
-          <Button onClick={send} disabled={!connected}>
-            Send
+          <Button onClick={send} disabled={sendLoading || input.trim() === ""}>
+            {sendLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send"}
           </Button>
         </div>
       </CardContent>
