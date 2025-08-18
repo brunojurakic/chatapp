@@ -9,3 +9,7 @@ docker-build:
 
 docker-run:
 	docker run --env-file ./backend/.env -p 8080:8080 chatapp-backend
+
+format:
+	cd frontend && npm run format
+	cd ../backend && mvn spotless:apply

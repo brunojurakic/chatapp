@@ -13,22 +13,21 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    @Autowired
-    private ChannelInterceptor webSocketAuthChannelInterceptor;
+  @Autowired private ChannelInterceptor webSocketAuthChannelInterceptor;
 
-    @Override
-    public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic");
-        config.setApplicationDestinationPrefixes("/app");
-    }
+  @Override
+  public void configureMessageBroker(MessageBrokerRegistry config) {
+    config.enableSimpleBroker("/topic");
+    config.setApplicationDestinationPrefixes("/app");
+  }
 
-    @Override
-    public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws").setAllowedOriginPatterns("*").withSockJS();
-    }
+  @Override
+  public void registerStompEndpoints(StompEndpointRegistry registry) {
+    registry.addEndpoint("/ws").setAllowedOriginPatterns("*").withSockJS();
+  }
 
-    @Override
-    public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.interceptors(webSocketAuthChannelInterceptor);
-    }
+  @Override
+  public void configureClientInboundChannel(ChannelRegistration registration) {
+    registration.interceptors(webSocketAuthChannelInterceptor);
+  }
 }
