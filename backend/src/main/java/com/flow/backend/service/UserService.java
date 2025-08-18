@@ -1,5 +1,6 @@
 package com.flow.backend.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,11 @@ public class UserService {
 
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
+    }
+
+    public List<User> searchUsers(String q) {
+        if (q == null || q.trim().isEmpty()) return List.of();
+        return userRepository.findByUsernameContainingIgnoreCaseOrNameContainingIgnoreCase(q, q);
     }
 
     public User createUser(String email, String name, String profilePictureUrl, String googleId) {

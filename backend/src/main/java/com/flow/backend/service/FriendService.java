@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.flow.backend.dto.FriendRequestDTO;
+import com.flow.backend.dto.OutgoingRequestDTO;
 import com.flow.backend.model.FriendRequest;
 import com.flow.backend.model.Friendship;
 import com.flow.backend.model.User;
@@ -91,5 +92,33 @@ public class FriendService {
             if (f.getUserA().getId().equals(user.getId())) return f.getUserB();
             return f.getUserA();
         }).collect(Collectors.toList());
+    }
+
+    public List<OutgoingRequestDTO> getOutgoingRequests(User requester) {
+        List<FriendRequest> reqs = friendRequestRepository.findByRequester(requester);
+        return reqs.stream().map(r -> new OutgoingRequestDTO(
+            r.getId(),
+            r.getRecipient().getId(),
+            r.getRecipient().getDisplayName() != null ? r.getRecipient().getDisplayName() : r.getRecipient().getName(),
+            r.getRecipient().getUsername(),
+            r.getRecipient().getProfilePictureUrl(),
+            r.getStatus(),
+            r.getCreatedAt()
+        )).collect(Collectors.toList());
+    }
+
+    public boolean hasPendingRequest(User requester, User recipient) {
+        if (requester == null || recipient == null) return false;
+        Optional<FriendRequest> existing = friendRequestRepository.findFirstByRequesterAndRecipientOrderByCreatedAtDesc(requester, recipient);
+        return existing.isPresent() && "PENDING".equals(existing.get().getStatus());
+    }
+
+    public Optional<FriendRequest> getPendingRequestBetween(User requester, User recipient) {
+        if (requester == null || recipient == null) return Optional.empty();
+        Optional<FriendRequest> existing = friendRequestRepository.findFirstByRequesterAndRecipientOrderByCreatedAtDesc(requester, recipient);
+        if (existing.isPresent() && "PENDING".equals(existing.get().getStatus())) {
+            return existing;
+        }
+        return Optional.empty();
     }
 }

@@ -53,6 +53,18 @@ public class FriendController {
         }
     }
 
+    @GetMapping("/outgoing")
+    public ResponseEntity<?> outgoingRequests(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+        try {
+            User me = getCurrentUserFromToken(authHeader);
+            if (me == null) return ResponseEntity.status(401).body("Not authenticated");
+            var list = friendService.getOutgoingRequests(me);
+            return ResponseEntity.ok(list);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @GetMapping("")
     public ResponseEntity<?> listFriends(@RequestHeader(value = "Authorization", required = false) String authHeader) {
         try {
