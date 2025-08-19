@@ -29,9 +29,9 @@ const Header: React.FC = () => {
   }
 
   return (
-    <nav className="border-b">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center h-16">
+    <nav className="border-b w-full">
+      <div className="w-full px-6">
+        <div className="flex items-center h-16 w-full">
           <div className="flex-1">
             <Link
               to="/home"

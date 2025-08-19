@@ -21,12 +21,25 @@ function Avatar({
 
 function AvatarImage({
   className,
+  crossOrigin = "anonymous",
+  referrerPolicy = "no-referrer",
+  loading = "lazy",
+  decoding = "async",
   ...props
-}: React.ComponentProps<typeof AvatarPrimitive.Image>) {
+}: React.ComponentProps<typeof AvatarPrimitive.Image> & {
+  crossOrigin?: "anonymous" | "use-credentials" | "" | undefined
+  referrerPolicy?: React.ImgHTMLAttributes<HTMLImageElement>["referrerPolicy"]
+  loading?: React.ImgHTMLAttributes<HTMLImageElement>["loading"]
+  decoding?: React.ImgHTMLAttributes<HTMLImageElement>["decoding"]
+}) {
   return (
     <AvatarPrimitive.Image
       data-slot="avatar-image"
       className={cn("aspect-square size-full", className)}
+      crossOrigin={crossOrigin}
+      referrerPolicy={referrerPolicy}
+      loading={loading}
+      decoding={decoding}
       {...props}
     />
   )

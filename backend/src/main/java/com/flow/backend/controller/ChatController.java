@@ -27,6 +27,7 @@ public class ChatController {
   @Autowired private ChatService chatService;
 
   @Autowired private com.flow.backend.service.FriendService friendService;
+  @Autowired private com.flow.backend.repository.FriendshipRepository friendshipRepository;
 
   private User getCurrentUserFromToken(String authHeader) {
     if (authHeader == null || !authHeader.startsWith("Bearer ")) return null;
@@ -64,6 +65,29 @@ public class ChatController {
       return ResponseEntity.ok(msgs);
     } catch (IllegalArgumentException ia) {
       return ResponseEntity.badRequest().body(Map.of("error", ia.getMessage()));
+    } catch (Exception e) {
+      return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+    }
+  }
+
+  @GetMapping("/{friendshipId}/participant")
+  public ResponseEntity<?> getParticipant(
+      @RequestHeader(value = "Authorization", required = false) String authHeader,
+      @PathVariable("friendshipId") UUID friendshipId) {
+    try {
+      User me = getCurrentUserFromToken(authHeader);
+      if (me == null) return ResponseEntity.status(401).body("Not authenticated");
+      var fOpt = friendshipRepository.findById(friendshipId);
+      if (fOpt.isEmpty())
+        return ResponseEntity.status(404).body(Map.of("error", "Friendship not found"));
+      var f = fOpt.get();
+      User other = f.getUserA().getId().equals(me.getId()) ? f.getUserB() : f.getUserA();
+      return ResponseEntity.ok(
+          Map.of(
+              "id", other.getId(),
+              "username", other.getUsername(),
+              "name", other.getDisplayName() != null ? other.getDisplayName() : other.getName(),
+              "picture", other.getProfilePictureUrl()));
     } catch (Exception e) {
       return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
     }

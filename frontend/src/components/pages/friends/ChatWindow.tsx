@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
-import { Loader2 } from "lucide-react"
+import { Loader2, Send, Wifi, WifiOff } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 import SockJS from "sockjs-client"
 import { Client } from "@stomp/stompjs"
 
@@ -19,12 +20,20 @@ interface Message {
 
 export function ChatRoom({ conversationId }: { conversationId: string }) {
   const [messages, setMessages] = useState<Message[]>([])
+  const [participant, setParticipant] = useState<{
+    id: string
+    username: string
+    name: string
+    picture?: string
+  } | null>(null)
   const [input, setInput] = useState("")
   const [connected, setConnected] = useState(false)
   const clientRef = useRef<Client | null>(null)
   const subRef = useRef<unknown>(null)
   const connectResolversRef = useRef<Array<(ok: boolean) => void>>([])
   const [sendLoading, setSendLoading] = useState(false)
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null)
+  const didInitialScrollRef = useRef(false)
 
   useEffect(() => {
     let mounted = true
@@ -43,6 +52,16 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
         setMessages(Array.isArray(data) ? data.reverse() : [])
       })
       .catch((err) => console.warn("Failed to fetch history", err))
+
+    fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/chats/${conversationId}/participant`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    )
+      .then((r) => r.json())
+      .then((data) => setParticipant(data))
+      .catch(() => setParticipant(null))
 
     const createClient = () => {
       console.debug("Creating stomp client for conversation", conversationId)
@@ -213,75 +232,139 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
     }
   }
 
+  useLayoutEffect(() => {
+    const c = scrollContainerRef.current
+    if (!c) return
+    const behavior = didInitialScrollRef.current
+      ? ("smooth" as const)
+      : ("auto" as const)
+    c.scrollTo({ top: c.scrollHeight, behavior })
+    didInitialScrollRef.current = true
+  }, [messages.length])
+
   return (
-    <Card className="w-full max-w-2xl">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>Chat</CardTitle>
-          <div className="flex items-center space-x-2">
-            <div
-              className={`text-xs font-medium ${connected ? "text-emerald-600" : "text-rose-600"}`}
-            >
-              {connected ? "Connected" : "Disconnected"}
-            </div>
+    <div className="h-full w-full bg-background dark:bg-black">
+      <div className="flex h-full w-full flex-col border-0 rounded-none bg-transparent py-0 gap-0">
+        {/* Top bar */}
+        <div className="flex items-center justify-between border-b px-6 py-3 bg-background/70 dark:bg-black">
+          <div className="flex items-center gap-3">
+            {participant ? (
+              <div className="flex items-center gap-3">
+                <Avatar className="h-9 w-9">
+                  {participant.picture ? (
+                    <AvatarImage
+                      src={participant.picture}
+                      alt={participant.name}
+                      className="h-9 w-9 rounded-full object-cover"
+                    />
+                  ) : null}
+                  <AvatarFallback className="bg-muted text-foreground/80 text-xs">
+                    {participant.name
+                      ?.split(" ")
+                      .map((s) => s[0])
+                      .join("")}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col leading-tight">
+                  <div className="text-sm font-medium">{participant.name}</div>
+                  <div className="text-xs text-muted-foreground">
+                    @{participant.username}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-base font-semibold">Direct Messages</div>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            <Badge variant={connected ? "default" : "destructive"}>
+              {connected ? (
+                <Wifi className="h-3 w-3" />
+              ) : (
+                <WifiOff className="h-3 w-3" />
+              )}
+              <span className="ml-1">
+                {connected ? "Connected" : "Disconnected"}
+              </span>
+            </Badge>
             {!connected ? (
               <Button size="sm" variant="outline" onClick={retryConnect}>
-                Retry
+                Reconnect
               </Button>
             ) : null}
           </div>
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="h-80 overflow-y-auto space-y-2 p-2 border rounded bg-surface">
-          {messages.map((m) => (
-            <div key={m.id} className="flex items-start space-x-3">
-              <Avatar className="h-8 w-8">
-                {m.senderPicture ? (
-                  <img
-                    src={m.senderPicture}
-                    alt={m.senderName}
-                    className="h-8 w-8 rounded-full object-cover"
-                  />
-                ) : (
-                  <AvatarFallback className="bg-emerald-100 text-emerald-700 text-xs">
+
+        <div
+          ref={scrollContainerRef}
+          className="flex-1 overflow-y-auto px-4 py-4 bg-background dark:bg-black"
+        >
+          <div className="mx-auto max-w-3xl space-y-4">
+            {messages.map((m) => (
+              <div key={m.id} className="flex items-start gap-3">
+                <Avatar className="h-9 w-9 border-1">
+                  {m.senderPicture ? (
+                    <AvatarImage
+                      src={m.senderPicture}
+                      alt={m.senderName}
+                      className="h-9 w-9 rounded-full object-cover"
+                      crossOrigin="anonymous"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : null}
+                  <AvatarFallback className="bg-muted text-foreground/80 text-xs">
                     {m.senderName
                       ?.split(" ")
                       .map((s) => s[0])
                       .join("")}
                   </AvatarFallback>
-                )}
-              </Avatar>
-              <div>
-                <div className="text-sm font-medium">{m.senderName}</div>
-                <div className="text-sm">{m.content}</div>
-                <div className="text-xs text-muted-foreground">
-                  {new Date(m.createdAt).toLocaleString()}
+                </Avatar>
+                <div className="min-w-0">
+                  <div className="flex items-baseline gap-2">
+                    <div className="truncate text-sm font-medium">
+                      {m.senderName}
+                    </div>
+                    <div className="text-[11px] text-muted-foreground">
+                      {new Date(m.createdAt).toLocaleString()}
+                    </div>
+                  </div>
+                  <div className="mt-1 inline-block max-w-[min(100%,72ch)] rounded-md bg-zinc-200 dark:bg-neutral-900 px-3 py-2 text-[13px] leading-relaxed text-foreground">
+                    {m.content}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
-        <div className="flex items-center space-x-2 mt-3">
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            className="flex-1 rounded border px-3 py-2"
-            placeholder="Type a message"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") send()
-            }}
-          />
-          <Button onClick={send} disabled={sendLoading || input.trim() === ""}>
-            {sendLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              "Send"
-            )}
-          </Button>
+        <div className="border-t px-4 py-3">
+          <div className="mx-auto flex max-w-3xl items-center gap-2">
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Message"
+              className="flex-1"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") send()
+              }}
+            />
+            <Button
+              onClick={send}
+              disabled={sendLoading || input.trim() === ""}
+              className="shrink-0"
+            >
+              {sendLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  <Send className="mr-1.5 h-4 w-4" />
+                  Send
+                </>
+              )}
+            </Button>
+          </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }

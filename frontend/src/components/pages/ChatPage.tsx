@@ -10,9 +10,9 @@ export default function ChatPage() {
   if (!id) return null
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex h-screen w-screen flex-col overflow-hidden bg-background dark:bg-black">
       <Header />
-      <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <div className="flex-1 overflow-hidden">
         <Suspense fallback={null}>
           <ChatRoom conversationId={id} />
         </Suspense>
