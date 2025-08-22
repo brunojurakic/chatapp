@@ -4,12 +4,13 @@ import FriendsList from "./friends/FriendsList"
 import SearchAndSend from "./friends/SearchAndSend"
 import OutgoingRequests from "./friends/OutgoingRequests"
 import IncomingRequests from "./friends/IncomingRequests"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useAuth } from "@/hooks/use-auth"
 
 export default function FriendsPage() {
   const { user, isLoading } = useAuth()
   const [incomingCount, setIncomingCount] = useState<number>(0)
+  const [activeTab, setActiveTab] = useState<string>("friends")
 
   useEffect(() => {
     ;(async () => {
@@ -63,12 +64,34 @@ export default function FriendsPage() {
       window.removeEventListener("friend:removed", refresh)
     }
   }, [user, isLoading])
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("friends:selectedTab")
+      const allowed = ["friends", "find", "requests"]
+      if (stored && allowed.includes(stored)) setActiveTab(stored)
+    } catch {
+      /* ignore */
+    }
+  }, [])
+
+  const _persistGuard = useRef(true)
+  useEffect(() => {
+    if (_persistGuard.current) {
+      _persistGuard.current = false
+      return
+    }
+    try {
+      localStorage.setItem("friends:selectedTab", activeTab)
+    } catch {
+      /* ignore */
+    }
+  }, [activeTab])
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <h2 className="text-2xl font-bold mb-4">Friends</h2>
-        <Tabs defaultValue="friends">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="space-x-3">
             <TabsTrigger value="friends">Friends</TabsTrigger>
             <TabsTrigger value="find">Add friends</TabsTrigger>
