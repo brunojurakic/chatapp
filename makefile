@@ -13,3 +13,7 @@ docker-run:
 format:
 	cd frontend && npm run format
 	cd backend && mvn spotless:apply
+
+lint:
+	cd frontend && npm run lint
+	cd frontend && npm run build

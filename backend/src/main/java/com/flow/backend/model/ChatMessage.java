@@ -10,7 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -33,11 +33,11 @@ public class ChatMessage {
   private String content;
 
   @Column(name = "created_at", nullable = false)
-  private LocalDateTime createdAt;
+  private Instant createdAt;
 
   @PrePersist
   protected void onCreate() {
-    createdAt = LocalDateTime.now();
+    createdAt = Instant.now();
   }
 
   public ChatMessage() {}
@@ -80,11 +80,11 @@ public class ChatMessage {
     this.content = content;
   }
 
-  public LocalDateTime getCreatedAt() {
+  public Instant getCreatedAt() {
     return createdAt;
   }
 
-  public void setCreatedAt(LocalDateTime createdAt) {
+  public void setCreatedAt(Instant createdAt) {
     this.createdAt = createdAt;
   }
 }

@@ -354,12 +354,25 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
                       <div
                         className={`flex items-baseline gap-2 mb-1 ${isMe ? "justify-end" : ""}`}
                       >
-                        <div className="truncate text-sm font-medium">
-                          {m.senderName}
-                        </div>
-                        <div className="text-[11px] text-muted-foreground">
-                          {new Date(m.createdAt).toLocaleString()}
-                        </div>
+                        {isMe ? (
+                          <>
+                            <div className="text-[11px] text-muted-foreground">
+                              {new Date(m.createdAt).toLocaleString()}
+                            </div>
+                            <div className="truncate text-sm font-medium">
+                              {m.senderName}
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="truncate text-sm font-medium">
+                              {m.senderName}
+                            </div>
+                            <div className="text-[11px] text-muted-foreground">
+                              {new Date(m.createdAt).toLocaleString()}
+                            </div>
+                          </>
+                        )}
                       </div>
                     ) : null}
 

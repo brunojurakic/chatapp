@@ -1,6 +1,6 @@
 package com.flow.backend.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 public class ChatMessageDTO {
@@ -10,7 +10,7 @@ public class ChatMessageDTO {
   private String senderName;
   private String senderPicture;
   private String content;
-  private LocalDateTime createdAt;
+  private Instant createdAt;
 
   public ChatMessageDTO() {}
 
@@ -21,7 +21,7 @@ public class ChatMessageDTO {
       String senderName,
       String senderPicture,
       String content,
-      LocalDateTime createdAt) {
+      Instant createdAt) {
     this.id = id;
     this.friendshipId = friendshipId;
     this.senderId = senderId;
@@ -79,11 +79,11 @@ public class ChatMessageDTO {
     this.content = content;
   }
 
-  public LocalDateTime getCreatedAt() {
+  public Instant getCreatedAt() {
     return createdAt;
   }
 
-  public void setCreatedAt(LocalDateTime createdAt) {
+  public void setCreatedAt(Instant createdAt) {
     this.createdAt = createdAt;
   }
 }
