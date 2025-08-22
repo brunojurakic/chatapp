@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect, useCallback } from "react"
 import type { ReactNode } from "react"
 
 interface User {
+  id?: string
   name: string
   email: string
   picture?: string
@@ -65,6 +66,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (response.ok) {
         const userData = await response.json()
         setUser({
+          id: userData.id,
           name: userData.displayName || userData.name,
           email: userData.email,
           picture: userData.picture,

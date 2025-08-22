@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
+import { useAuth } from "@/hooks/use-auth"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Textarea } from "@/components/ui/textarea"
@@ -19,6 +20,10 @@ interface Message {
 }
 
 export function ChatRoom({ conversationId }: { conversationId: string }) {
+  const { user } = useAuth()
+  const currentUserId = user?.id ?? null
+  const currentUsername = user?.username ?? null
+  const currentDisplayName = user?.displayName ?? user?.name ?? null
   const [messages, setMessages] = useState<Message[]>([])
   const [participant, setParticipant] = useState<{
     id: string
@@ -299,41 +304,80 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
           ref={scrollContainerRef}
           className="flex-1 overflow-y-auto px-4 py-4 bg-background dark:bg-black"
         >
-          <div className="mx-auto max-w-3xl space-y-4">
-            {messages.map((m) => (
-              <div key={m.id} className="flex items-start gap-3">
-                <Avatar className="h-9 w-9 border-1">
-                  {m.senderPicture ? (
-                    <AvatarImage
-                      src={m.senderPicture}
-                      alt={m.senderName}
-                      className="h-9 w-9 rounded-full object-cover"
-                      crossOrigin="anonymous"
-                      referrerPolicy="no-referrer"
-                    />
-                  ) : null}
-                  <AvatarFallback className="bg-muted text-foreground/80 text-xs">
-                    {m.senderName
-                      ?.split(" ")
-                      .map((s) => s[0])
-                      .join("")}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="min-w-0">
-                  <div className="flex items-baseline gap-2">
-                    <div className="truncate text-sm font-medium">
-                      {m.senderName}
+          <div className="mx-auto max-w-3xl">
+            {messages.map((m, i) => {
+              const isMe =
+                (currentUserId && m.senderId === currentUserId) ||
+                (currentDisplayName && m.senderName === currentDisplayName) ||
+                (currentUsername && m.senderName === currentUsername) ||
+                false
+
+              const prev = messages[i - 1]
+              const prevTime = prev ? Date.parse(prev.createdAt) : 0
+              const curTime = Date.parse(m.createdAt)
+              const isFirstInGroup =
+                i === 0 ||
+                prev.senderId !== m.senderId ||
+                curTime - prevTime > 60_000
+
+              return (
+                <div
+                  key={m.id}
+                  className={`flex items-start gap-3 first:mt-0 ${isMe ? "flex-row-reverse" : ""} ${isFirstInGroup ? "mt-2" : "mt-0.5"}`}
+                >
+                  {isFirstInGroup ? (
+                    <Avatar className="h-9 w-9 border-1 flex-shrink-0">
+                      {m.senderPicture ? (
+                        <AvatarImage
+                          src={m.senderPicture}
+                          alt={m.senderName}
+                          className="h-9 w-9 rounded-full object-cover"
+                          crossOrigin="anonymous"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : null}
+                      <AvatarFallback className="bg-muted text-foreground/80 text-xs">
+                        {m.senderName
+                          ?.split(" ")
+                          .map((s) => s[0])
+                          .join("")}
+                      </AvatarFallback>
+                    </Avatar>
+                  ) : (
+                    <div aria-hidden className="h-9 w-9 flex-shrink-0" />
+                  )}
+
+                  <div
+                    className={`min-w-0 flex-1 flex flex-col ${isMe ? "items-end" : "items-start"}`}
+                  >
+                    {isFirstInGroup ? (
+                      <div
+                        className={`flex items-baseline gap-2 mb-1 ${isMe ? "justify-end" : ""}`}
+                      >
+                        <div className="truncate text-sm font-medium">
+                          {m.senderName}
+                        </div>
+                        <div className="text-[11px] text-muted-foreground">
+                          {new Date(m.createdAt).toLocaleString()}
+                        </div>
+                      </div>
+                    ) : null}
+
+                    <div
+                      className={
+                        `block max-w-[min(100%,72ch)] rounded-md px-3 py-2 text-[13px] leading-relaxed whitespace-pre-wrap break-words ` +
+                        (isMe
+                          ? "bg-emerald-100 text-slate-900 dark:bg-emerald-950 dark:text-slate-100 text-right"
+                          : "bg-zinc-200 dark:bg-neutral-900 text-foreground text-left")
+                      }
+                      role="article"
+                    >
+                      {m.content}
                     </div>
-                    <div className="text-[11px] text-muted-foreground">
-                      {new Date(m.createdAt).toLocaleString()}
-                    </div>
-                  </div>
-                  <div className="mt-1 inline-block max-w-[min(100%,72ch)] rounded-md bg-zinc-200 dark:bg-neutral-900 px-3 py-2 text-[13px] leading-relaxed text-foreground whitespace-pre-wrap">
-                    {m.content}
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
 
