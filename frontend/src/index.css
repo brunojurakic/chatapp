@@ -130,3 +130,44 @@
     @apply cursor-pointer;
   }
 }
+
+textarea[data-slot="textarea"],
+input[data-slot="input"],
+.overflow-y-auto {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(15, 23, 42, 0.12) transparent;
+}
+
+textarea[data-slot="textarea"]::-webkit-scrollbar,
+input[data-slot="input"]::-webkit-scrollbar,
+.overflow-y-auto::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+textarea[data-slot="textarea"]::-webkit-scrollbar-track,
+input[data-slot="input"]::-webkit-scrollbar-track,
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+textarea[data-slot="textarea"]::-webkit-scrollbar-thumb,
+input[data-slot="input"]::-webkit-scrollbar-thumb,
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background-clip: padding-box;
+  border: 2px solid transparent;
+  background-color: rgba(15, 23, 42, 0.12);
+}
+
+.dark textarea[data-slot="textarea"],
+.dark input[data-slot="input"],
+.dark .overflow-y-auto {
+  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+}
+
+.dark textarea[data-slot="textarea"]::-webkit-scrollbar-thumb,
+.dark input[data-slot="input"]::-webkit-scrollbar-thumb,
+.dark .overflow-y-auto::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.12);
+}

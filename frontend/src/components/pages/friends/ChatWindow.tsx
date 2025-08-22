@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import { Loader2, Send, Wifi, WifiOff } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
@@ -328,7 +328,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
                       {new Date(m.createdAt).toLocaleString()}
                     </div>
                   </div>
-                  <div className="mt-1 inline-block max-w-[min(100%,72ch)] rounded-md bg-zinc-200 dark:bg-neutral-900 px-3 py-2 text-[13px] leading-relaxed text-foreground">
+                  <div className="mt-1 inline-block max-w-[min(100%,72ch)] rounded-md bg-zinc-200 dark:bg-neutral-900 px-3 py-2 text-[13px] leading-relaxed text-foreground whitespace-pre-wrap">
                     {m.content}
                   </div>
                 </div>
@@ -339,13 +339,17 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
 
         <div className="border-t px-4 py-3">
           <div className="mx-auto flex max-w-3xl items-center gap-2">
-            <Input
+            <Textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Message"
               className="flex-1"
+              rows={1}
               onKeyDown={(e) => {
-                if (e.key === "Enter") send()
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault()
+                  send()
+                }
               }}
             />
             <Button
