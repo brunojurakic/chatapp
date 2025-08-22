@@ -72,6 +72,18 @@ export default function FriendsPage() {
     } catch {
       /* ignore */
     }
+
+    const onSelect = (e: Event) => {
+      try {
+        const detail = (e as CustomEvent).detail
+        const allowed = ["friends", "find", "requests"]
+        if (detail && allowed.includes(detail)) setActiveTab(detail)
+      } catch {
+        /* ignore */
+      }
+    }
+    window.addEventListener("friends:selectTab", onSelect)
+    return () => window.removeEventListener("friends:selectTab", onSelect)
   }, [])
 
   const _persistGuard = useRef(true)

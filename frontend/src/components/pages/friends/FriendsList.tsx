@@ -116,7 +116,34 @@ export default function FriendsList() {
               <span>Loading friends...</span>
             </div>
           ) : friends.length === 0 ? (
-            <p className="text-muted-foreground">You have no friends yet</p>
+            <div className="space-y-3">
+              <p className="text-muted-foreground">You have no friends yet</p>
+              <div>
+                <Button
+                  size="sm"
+                  variant="accent"
+                  onClick={() => {
+                    try {
+                      localStorage.setItem("friends:selectedTab", "find")
+                    } catch {
+                      /* ignore */
+                    }
+                    try {
+                      window.dispatchEvent(
+                        new CustomEvent("friends:selectTab", {
+                          detail: "find",
+                        }),
+                      )
+                    } catch {
+                      /* ignore */
+                    }
+                    navigate("/friends")
+                  }}
+                >
+                  Find friends
+                </Button>
+              </div>
+            </div>
           ) : (
             friends.map((f) => (
               <div
