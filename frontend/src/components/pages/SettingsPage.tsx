@@ -153,7 +153,9 @@ const SettingsPage = () => {
       <main className="max-w-2xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="space-y-6">
           <div>
-            <h1 className="text-3xl font-bold">Settings</h1>
+            <h1 className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
+              Settings
+            </h1>
             <p className="text-muted-foreground mt-2">
               Manage your account settings and preferences.
             </p>
@@ -278,6 +280,7 @@ const SettingsPage = () => {
                 type="submit"
                 disabled={!hasChanges || isLoading}
                 className="flex items-center gap-2"
+                variant={"accent"}
               >
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

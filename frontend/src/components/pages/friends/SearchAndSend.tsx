@@ -134,7 +134,12 @@ export default function SearchAndSend() {
               className="rounded-l-none"
             />
           </div>
-          <Button type="submit" disabled={loading} aria-label="Search users">
+          <Button
+            type="submit"
+            disabled={loading}
+            aria-label="Search users"
+            variant={"accent"}
+          >
             {loading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />

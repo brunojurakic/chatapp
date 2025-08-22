@@ -9,6 +9,8 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
+        accent:
+          "bg-emerald-600 text-white shadow-xs hover:bg-emerald-700 dark:bg-emerald-400 dark:text-slate-900 dark:hover:bg-emerald-300",
         default:
           "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
         destructive:
@@ -56,4 +58,4 @@ function Button({
   )
 }
 
-export { Button, buttonVariants }
+export { Button }
