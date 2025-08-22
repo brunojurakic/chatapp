@@ -1,4 +1,5 @@
 import { useState } from "react"
+import type { FormEvent } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -115,7 +116,13 @@ export default function SearchAndSend() {
         <CardTitle>Find users</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center gap-2 mb-4">
+        <form
+          onSubmit={(e: FormEvent) => {
+            e.preventDefault()
+            search()
+          }}
+          className="flex items-center gap-2 mb-4"
+        >
           <div className="flex flex-1">
             <span className="inline-flex items-center px-3 text-sm border border-r-0 rounded-l-md bg-muted">
               @
@@ -127,10 +134,17 @@ export default function SearchAndSend() {
               className="rounded-l-none"
             />
           </div>
-          <Button onClick={search}>
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Search"}
+          <Button type="submit" disabled={loading} aria-label="Search users">
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                Searching...
+              </>
+            ) : (
+              "Search"
+            )}
           </Button>
-        </div>
+        </form>
 
         {results.length === 0 ? (
           <p className="text-muted-foreground">No users</p>
