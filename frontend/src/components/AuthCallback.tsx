@@ -1,6 +1,6 @@
 import React, { useEffect } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
-import { useAuth } from "../../hooks/use-auth"
+import { useAuth } from "../hooks/use-auth"
 import { Loader2 } from "lucide-react"
 
 const AuthCallback: React.FC = () => {

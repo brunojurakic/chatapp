@@ -1,13 +1,11 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { useAuth } from "@/hooks/use-auth"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
-import { Loader2, Send, Wifi, WifiOff } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
 import SockJS from "sockjs-client"
 import { Client } from "@stomp/stompjs"
+import { ChatHeader } from "./ChatHeader"
+import { MessageList } from "./MessageList"
+import { ChatInput } from "./ChatInput"
 
 interface Message {
   id: string
@@ -19,28 +17,32 @@ interface Message {
   createdAt: string
 }
 
+interface Participant {
+  id: string
+  username: string
+  name: string
+  picture?: string
+}
+
 export function ChatRoom({ conversationId }: { conversationId: string }) {
   const { user } = useAuth()
   const currentUserId = user?.id ?? null
   const currentUsername = user?.username ?? null
   const currentDisplayName = user?.displayName ?? user?.name ?? null
+
   const [messages, setMessages] = useState<Message[]>([])
-  const [participant, setParticipant] = useState<{
-    id: string
-    username: string
-    name: string
-    picture?: string
-  } | null>(null)
+  const [participant, setParticipant] = useState<Participant | null>(null)
   const [input, setInput] = useState("")
   const [connected, setConnected] = useState(false)
+  const [sendLoading, setSendLoading] = useState(false)
+  const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set())
+
   const clientRef = useRef<Client | null>(null)
   const subRef = useRef<unknown>(null)
   const typingSubRef = useRef<unknown>(null)
   const connectResolversRef = useRef<Array<(ok: boolean) => void>>([])
-  const [sendLoading, setSendLoading] = useState(false)
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const didInitialScrollRef = useRef(false)
-  const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set())
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const isTypingRef = useRef(false)
 
@@ -149,20 +151,25 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
 
     const client = createClient()
 
+    const currentSub = subRef
+    const currentTypingSub = typingSubRef
+
     return () => {
       mounted = false
       try {
-        ;(subRef.current as { unsubscribe?: () => void })?.unsubscribe?.()
+        ;(currentSub.current as { unsubscribe?: () => void })?.unsubscribe?.()
       } catch (err) {
         console.warn(err)
       }
       try {
-        ;(typingSubRef.current as { unsubscribe?: () => void })?.unsubscribe?.()
+        ;(
+          currentTypingSub.current as { unsubscribe?: () => void }
+        )?.unsubscribe?.()
       } catch (err) {
         console.warn(err)
       }
       try {
-        client.deactivate()
+        client?.deactivate()
       } catch (err) {
         console.warn(err)
       }
@@ -358,202 +365,27 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
   return (
     <div className="h-full w-full bg-background dark:bg-black">
       <div className="flex h-full w-full flex-col border-0 rounded-none bg-transparent py-0 gap-0">
-        <div className="flex items-center justify-between border-b px-6 py-3 bg-background/70 dark:bg-black">
-          <div className="flex items-center gap-3">
-            {participant ? (
-              <div className="flex items-center gap-3">
-                <Avatar className="h-9 w-9">
-                  {participant.picture ? (
-                    <AvatarImage
-                      src={participant.picture}
-                      alt={participant.name}
-                      className="h-9 w-9 rounded-full object-cover"
-                    />
-                  ) : null}
-                  <AvatarFallback className="bg-muted text-foreground/80 text-xs">
-                    {participant.name
-                      ?.split(" ")
-                      .map((s) => s[0])
-                      .join("")}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex flex-col leading-tight">
-                  <div className="text-sm font-medium">{participant.name}</div>
-                  <div className="text-xs text-muted-foreground">
-                    @{participant.username}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="text-base font-semibold">Direct Messages</div>
-            )}
-          </div>
-          <div className="flex items-center gap-3">
-            {typingUsers.size > 0 && !isTypingRef.current && (
-              <div className="flex items-center gap-1.5">
-                <div className="flex items-center space-x-1">
-                  <div
-                    className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce"
-                    style={{ animationDelay: "0ms" }}
-                  />
-                  <div
-                    className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce"
-                    style={{ animationDelay: "150ms" }}
-                  />
-                  <div
-                    className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce"
-                    style={{ animationDelay: "300ms" }}
-                  />
-                </div>
-                <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-                  typing
-                </span>
-              </div>
-            )}
+        <ChatHeader
+          participant={participant}
+          connected={connected}
+          isTyping={typingUsers.size > 0 && !isTypingRef.current}
+          onRetryConnect={retryConnect}
+        />
 
-            <Badge variant={connected ? "default" : "destructive"}>
-              {connected ? (
-                <Wifi className="h-3 w-3" />
-              ) : (
-                <WifiOff className="h-3 w-3" />
-              )}
-              <span className="ml-1">
-                {connected ? "Connected" : "Disconnected"}
-              </span>
-            </Badge>
-            {!connected ? (
-              <Button size="sm" variant="outline" onClick={retryConnect}>
-                Reconnect
-              </Button>
-            ) : null}
-          </div>
-        </div>
-
-        <div
+        <MessageList
           ref={scrollContainerRef}
-          className="flex-1 overflow-y-auto px-4 py-4 bg-background dark:bg-black"
-        >
-          <div className="mx-auto max-w-3xl">
-            {messages.map((m, i) => {
-              const isMe =
-                (currentUserId && m.senderId === currentUserId) ||
-                (currentDisplayName && m.senderName === currentDisplayName) ||
-                (currentUsername && m.senderName === currentUsername) ||
-                false
+          messages={messages}
+          currentUserId={currentUserId}
+          currentDisplayName={currentDisplayName}
+          currentUsername={currentUsername}
+        />
 
-              const prev = messages[i - 1]
-              const prevTime = prev ? Date.parse(prev.createdAt) : 0
-              const curTime = Date.parse(m.createdAt)
-              const isFirstInGroup =
-                i === 0 ||
-                prev.senderId !== m.senderId ||
-                curTime - prevTime > 60_000
-
-              return (
-                <div
-                  key={m.id}
-                  className={`flex items-start gap-3 first:mt-0 ${isMe ? "flex-row-reverse" : ""} ${isFirstInGroup ? "mt-2" : "mt-0.5"}`}
-                >
-                  {isFirstInGroup ? (
-                    <Avatar className="h-9 w-9 border-1 flex-shrink-0">
-                      {m.senderPicture ? (
-                        <AvatarImage
-                          src={m.senderPicture}
-                          alt={m.senderName}
-                          className="h-9 w-9 rounded-full object-cover"
-                          crossOrigin="anonymous"
-                          referrerPolicy="no-referrer"
-                        />
-                      ) : null}
-                      <AvatarFallback className="bg-muted text-foreground/80 text-xs">
-                        {m.senderName
-                          ?.split(" ")
-                          .map((s) => s[0])
-                          .join("")}
-                      </AvatarFallback>
-                    </Avatar>
-                  ) : (
-                    <div aria-hidden className="h-9 w-9 flex-shrink-0" />
-                  )}
-
-                  <div
-                    className={`min-w-0 flex-1 flex flex-col ${isMe ? "items-end" : "items-start"}`}
-                  >
-                    {isFirstInGroup ? (
-                      <div
-                        className={`flex items-baseline gap-2 mb-1 ${isMe ? "justify-end" : ""}`}
-                      >
-                        {isMe ? (
-                          <>
-                            <div className="text-[11px] text-muted-foreground">
-                              {new Date(m.createdAt).toLocaleString()}
-                            </div>
-                            <div className="truncate text-sm font-medium">
-                              {m.senderName}
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <div className="truncate text-sm font-medium">
-                              {m.senderName}
-                            </div>
-                            <div className="text-[11px] text-muted-foreground">
-                              {new Date(m.createdAt).toLocaleString()}
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    ) : null}
-
-                    <div
-                      className={
-                        `block max-w-[min(100%,72ch)] rounded-md px-3 py-2 text-[13px] leading-relaxed whitespace-pre-wrap break-words ` +
-                        (isMe
-                          ? "bg-emerald-100 text-slate-900 dark:bg-emerald-950 dark:text-slate-100 text-right"
-                          : "bg-zinc-200 dark:bg-neutral-900 text-foreground text-left")
-                      }
-                      role="article"
-                    >
-                      {m.content}
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-
-        <div className="border-t px-4 py-3">
-          <div className="mx-auto flex max-w-3xl items-center gap-2">
-            <Textarea
-              value={input}
-              onChange={(e) => handleInputChange(e.target.value)}
-              placeholder="Message"
-              className="flex-1"
-              rows={1}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault()
-                  send()
-                }
-              }}
-            />
-            <Button
-              onClick={send}
-              disabled={sendLoading || input.trim() === ""}
-              className="shrink-0"
-            >
-              {sendLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <>
-                  <Send className="mr-1.5 h-4 w-4" />
-                  Send
-                </>
-              )}
-            </Button>
-          </div>
-        </div>
+        <ChatInput
+          input={input}
+          sendLoading={sendLoading}
+          onInputChange={handleInputChange}
+          onSend={send}
+        />
       </div>
     </div>
   )

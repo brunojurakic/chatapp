@@ -13,7 +13,7 @@ import LoginPage from "./components/pages/LoginPage"
 import HomePage from "./components/pages/HomePage"
 import SetupPage from "./components/pages/SetupPage"
 import SettingsPage from "./components/pages/SettingsPage"
-import AuthCallback from "./components/pages/AuthCallback"
+import AuthCallback from "./components/AuthCallback"
 import FriendsPage from "./components/pages/FriendsPage"
 import ChatPage from "./components/pages/ChatPage"
 

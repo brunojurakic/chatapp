@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/use-auth"
 import Header from "@/components/header"
-import FriendsList from "@/components/pages/friends/FriendsList"
+import FriendsList from "@/components/friends/FriendsList"
 import { Navigate } from "react-router-dom"
 
 const HomePage = () => {

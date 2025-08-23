@@ -2,7 +2,7 @@ import React, { Suspense } from "react"
 import { useParams } from "react-router-dom"
 import Header from "@/components/header"
 const ChatRoom = React.lazy(() =>
-  import("./friends/ChatWindow").then((m) => ({ default: m.ChatRoom })),
+  import("../chat/ChatWindow").then((m) => ({ default: m.ChatRoom })),
 )
 
 export default function ChatPage() {

@@ -1,9 +1,9 @@
 import Header from "@/components/header"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import FriendsList from "./friends/FriendsList"
-import SearchAndSend from "./friends/SearchAndSend"
-import OutgoingRequests from "./friends/OutgoingRequests"
-import IncomingRequests from "./friends/IncomingRequests"
+import FriendsList from "../friends/FriendsList"
+import SearchAndSend from "../friends/SearchAndSend"
+import OutgoingRequests from "../friends/OutgoingRequests"
+import IncomingRequests from "../friends/IncomingRequests"
 import { useEffect, useState, useRef } from "react"
 import { useAuth } from "@/hooks/use-auth"
 
