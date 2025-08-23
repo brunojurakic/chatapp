@@ -35,10 +35,14 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
   const [connected, setConnected] = useState(false)
   const clientRef = useRef<Client | null>(null)
   const subRef = useRef<unknown>(null)
+  const typingSubRef = useRef<unknown>(null)
   const connectResolversRef = useRef<Array<(ok: boolean) => void>>([])
   const [sendLoading, setSendLoading] = useState(false)
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const didInitialScrollRef = useRef(false)
+  const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set())
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const isTypingRef = useRef(false)
 
   useEffect(() => {
     let mounted = true
@@ -97,6 +101,31 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
                 }
               },
             )
+
+            typingSubRef.current = client.subscribe(
+              `/topic/chats/${conversationId}/typing`,
+              (msg) => {
+                try {
+                  const typingEvent = JSON.parse(msg.body)
+                  if (
+                    typingEvent.type === "typing" &&
+                    typingEvent.userId !== currentUserId
+                  ) {
+                    setTypingUsers((prev) => {
+                      const newSet = new Set(prev)
+                      if (typingEvent.isTyping) {
+                        newSet.add(typingEvent.userId)
+                      } else {
+                        newSet.delete(typingEvent.userId)
+                      }
+                      return newSet
+                    })
+                  }
+                } catch (err) {
+                  console.warn("Failed to parse typing indicator", err)
+                }
+              },
+            )
           } catch (err) {
             console.warn("Subscribe failed", err)
           }
@@ -123,8 +152,12 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
     return () => {
       mounted = false
       try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ;(subRef.current as any)?.unsubscribe?.()
+        ;(subRef.current as { unsubscribe?: () => void })?.unsubscribe?.()
+      } catch (err) {
+        console.warn(err)
+      }
+      try {
+        ;(typingSubRef.current as { unsubscribe?: () => void })?.unsubscribe?.()
       } catch (err) {
         console.warn(err)
       }
@@ -134,7 +167,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
         console.warn(err)
       }
     }
-  }, [conversationId])
+  }, [conversationId, currentUserId])
 
   const retryConnect = () => {
     try {
@@ -173,6 +206,31 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
                 console.warn(err)
               }
             })
+            ;(
+              client as {
+                subscribe: (d: string, cb: (m: StompMsg) => void) => void
+              }
+            ).subscribe(`/topic/chats/${conversationId}/typing`, (msg) => {
+              try {
+                const typingEvent = JSON.parse(msg.body)
+                if (
+                  typingEvent.type === "typing" &&
+                  typingEvent.userId !== currentUserId
+                ) {
+                  setTypingUsers((prev) => {
+                    const newSet = new Set(prev)
+                    if (typingEvent.isTyping) {
+                      newSet.add(typingEvent.userId)
+                    } else {
+                      newSet.delete(typingEvent.userId)
+                    }
+                    return newSet
+                  })
+                }
+              } catch (err) {
+                console.warn("Failed to parse typing indicator", err)
+              }
+            })
           } catch (err) {
             console.warn(err)
           }
@@ -187,6 +245,47 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
     } catch (err) {
       console.warn("Retry failed", err)
       toast.error("Could not reconnect")
+    }
+  }
+
+  const sendTypingIndicator = (isTyping: boolean) => {
+    if (!connected || !clientRef.current) return
+
+    try {
+      clientRef.current.publish({
+        destination: `/app/chats/${conversationId}/typing`,
+        body: isTyping.toString(),
+      })
+    } catch (err) {
+      console.warn("Failed to send typing indicator", err)
+    }
+  }
+
+  const handleInputChange = (value: string) => {
+    setInput(value)
+
+    if (value.trim().length > 0) {
+      if (!isTypingRef.current) {
+        isTypingRef.current = true
+        sendTypingIndicator(true)
+      }
+
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current)
+      }
+
+      typingTimeoutRef.current = setTimeout(() => {
+        isTypingRef.current = false
+        sendTypingIndicator(false)
+      }, 3000)
+    } else {
+      if (isTypingRef.current) {
+        isTypingRef.current = false
+        sendTypingIndicator(false)
+      }
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current)
+      }
     }
   }
 
@@ -228,6 +327,15 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
         destination: `/app/chats/${conversationId}/send`,
         body: input.trim(),
       })
+
+      if (isTypingRef.current) {
+        isTypingRef.current = false
+        sendTypingIndicator(false)
+      }
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current)
+      }
+
       setInput("")
     } catch (err) {
       console.warn(err)
@@ -250,7 +358,6 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
   return (
     <div className="h-full w-full bg-background dark:bg-black">
       <div className="flex h-full w-full flex-col border-0 rounded-none bg-transparent py-0 gap-0">
-        {/* Top bar */}
         <div className="flex items-center justify-between border-b px-6 py-3 bg-background/70 dark:bg-black">
           <div className="flex items-center gap-3">
             {participant ? (
@@ -282,6 +389,28 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
             )}
           </div>
           <div className="flex items-center gap-3">
+            {typingUsers.size > 0 && !isTypingRef.current && (
+              <div className="flex items-center gap-1.5">
+                <div className="flex items-center space-x-1">
+                  <div
+                    className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce"
+                    style={{ animationDelay: "0ms" }}
+                  />
+                  <div
+                    className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce"
+                    style={{ animationDelay: "150ms" }}
+                  />
+                  <div
+                    className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce"
+                    style={{ animationDelay: "300ms" }}
+                  />
+                </div>
+                <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                  typing
+                </span>
+              </div>
+            )}
+
             <Badge variant={connected ? "default" : "destructive"}>
               {connected ? (
                 <Wifi className="h-3 w-3" />
@@ -398,7 +527,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
           <div className="mx-auto flex max-w-3xl items-center gap-2">
             <Textarea
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => handleInputChange(e.target.value)}
               placeholder="Message"
               className="flex-1"
               rows={1}
