@@ -176,7 +176,9 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
       }
 
       const msg = await res.json()
-      setMessages((prev) => [...prev, msg])
+      if (!connected) {
+        setMessages((prev) => [...prev, msg])
+      }
       toast.success("File uploaded successfully")
     } catch (err) {
       console.warn(err)

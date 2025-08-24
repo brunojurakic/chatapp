@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.MessagingException;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,6 +36,7 @@ public class ChatController {
   @Autowired private com.flow.backend.service.FriendService friendService;
   @Autowired private com.flow.backend.repository.FriendshipRepository friendshipRepository;
   @Autowired private com.flow.backend.service.VercelBlobService vercelBlobService;
+  @Autowired private org.springframework.messaging.simp.SimpMessagingTemplate messagingTemplate;
 
   @PostMapping("/{friendshipId}/upload")
   public ResponseEntity<?> uploadAndSendMessage(
@@ -59,6 +61,12 @@ public class ChatController {
               uploadedUrl,
               attachmentType,
               attachmentName);
+
+      try {
+        messagingTemplate.convertAndSend("/topic/chats/" + friendshipId.toString(), dto);
+      } catch (MessagingException e) {
+        System.err.println("Failed to broadcast uploaded message: " + e.getMessage());
+      }
 
       return ResponseEntity.ok(dto);
     } catch (IllegalArgumentException ia) {
