@@ -1,4 +1,4 @@
-import { Download, File as FileIcon } from "lucide-react"
+import { Download } from "lucide-react"
 import type { MouseEvent } from "react"
 import { downloadImage } from "@/lib/downloadImage"
 import { Button } from "../ui/button"
