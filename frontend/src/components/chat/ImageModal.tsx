@@ -1,4 +1,7 @@
 import { useEffect, useRef, useState } from "react"
+import { Button } from "../ui/button"
+import { Download, X } from "lucide-react"
+import { downloadImage } from "@/lib/downloadImage"
 
 interface ImageModalProps {
   src: string
@@ -58,11 +61,32 @@ export function ImageModal({ src, alt, open, onClose }: ImageModalProps) {
       role="dialog"
     >
       <div
-        className={`max-h-[90vh] max-w-[90vw] p-2 transform transition-all duration-200 ease-out ${
+        ref={containerRef}
+        className={`relative max-h-[90vh] max-w-[90vw] p-2 transform transition-all duration-200 ease-out ${
           entered ? "opacity-100 scale-100" : "opacity-0 scale-95"
         }`}
         onClick={(e) => e.stopPropagation()}
       >
+        <Button
+          onClick={onClose}
+          className="right-5 top-5 fixed"
+          onMouseDown={(e) => e.stopPropagation()}
+          variant={"default"}
+        >
+          <X />
+        </Button>
+
+        <Button
+          onClick={async (e) => {
+            e.stopPropagation()
+            await downloadImage(src)
+          }}
+          className="left-5 top-5 fixed"
+          variant={"default"}
+        >
+          <Download />
+        </Button>
+
         <img
           src={src}
           alt={alt}
