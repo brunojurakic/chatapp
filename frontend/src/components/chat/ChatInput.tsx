@@ -6,6 +6,7 @@ import { Loader2, Paperclip, Send } from "lucide-react"
 interface ChatInputProps {
   input: string
   sendLoading: boolean
+  uploadLoading?: boolean
   onInputChange: (value: string) => void
   onSend: () => void
   onFileSelected?: (file: File) => void
@@ -14,6 +15,7 @@ interface ChatInputProps {
 export function ChatInput({
   input,
   sendLoading,
+  uploadLoading = false,
   onInputChange,
   onSend,
   onFileSelected,
@@ -67,8 +69,16 @@ export function ChatInput({
           className="hidden"
           onChange={handleFileChange}
         />
-        <Button onClick={triggerFile} variant="outline">
-          <Paperclip />
+        <Button
+          onClick={triggerFile}
+          variant="outline"
+          disabled={uploadLoading}
+        >
+          {uploadLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Paperclip className="h-4 w-4" />
+          )}
         </Button>
       </div>
     </div>

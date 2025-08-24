@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import type { Message } from "@/types/chat"
+import { ImageAttachmentWithModal } from "./ImageAttachmentWithModal"
 
 interface MessageBubbleProps {
   message: Message
@@ -67,40 +68,45 @@ export function MessageBubble({
           </div>
         ) : null}
 
-        <div
-          className={
-            `block max-w-[min(100%,72ch)] rounded-md px-3 py-2 text-[13px] leading-relaxed whitespace-pre-wrap break-words ` +
-            (isMe
-              ? "bg-emerald-100 text-slate-900 dark:bg-emerald-950 dark:text-slate-100 text-right"
-              : "bg-zinc-200 dark:bg-neutral-900 text-foreground text-left")
-          }
-          role="article"
-        >
-          {message.content}
-          {message.attachmentUrl ? (
-            <div className="mt-2">
-              {message.attachmentType &&
-              message.attachmentType.startsWith("image/") ? (
-                <img
-                  src={message.attachmentUrl}
-                  alt={message.attachmentName ?? "attachment"}
-                  className="max-h-60 w-auto rounded-md object-cover"
-                  crossOrigin="anonymous"
-                  referrerPolicy="no-referrer"
-                />
-              ) : (
-                <a
-                  href={message.attachmentUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="underline"
-                >
-                  {message.attachmentName || "Download attachment"}
-                </a>
-              )}
-            </div>
-          ) : null}
-        </div>
+        {message.attachmentUrl &&
+        message.attachmentType?.startsWith("image/") ? (
+          <ImageAttachmentWithModal message={message} isMe={isMe} />
+        ) : (
+          <div
+            className={
+              `block max-w-[min(100%,72ch)] rounded-md px-3 py-2 text-[13px] leading-relaxed whitespace-pre-wrap break-words ` +
+              (isMe
+                ? "bg-emerald-100 text-slate-900 dark:bg-emerald-950 dark:text-slate-100 text-right"
+                : "bg-zinc-200 dark:bg-neutral-900 text-foreground text-left")
+            }
+            role="article"
+          >
+            {message.content}
+            {message.attachmentUrl ? (
+              <div className="mt-2">
+                {message.attachmentType &&
+                message.attachmentType.startsWith("image/") ? (
+                  <img
+                    src={message.attachmentUrl}
+                    alt={message.attachmentName ?? "attachment"}
+                    className="max-h-60 w-auto rounded-md object-cover"
+                    crossOrigin="anonymous"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <a
+                    href={message.attachmentUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="underline"
+                  >
+                    {message.attachmentName || "Download attachment"}
+                  </a>
+                )}
+              </div>
+            ) : null}
+          </div>
+        )}
       </div>
     </div>
   )

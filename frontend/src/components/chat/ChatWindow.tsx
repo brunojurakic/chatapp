@@ -25,6 +25,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
   const [input, setInput] = useState("")
   const [connected, setConnected] = useState(false)
   const [sendLoading, setSendLoading] = useState(false)
+  const [uploadLoading, setUploadLoading] = useState(false)
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set())
   const [isCurrentUserTyping, setIsCurrentUserTyping] = useState(false)
 
@@ -157,6 +158,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
     form.append("file", file)
     form.append("content", "")
 
+    setUploadLoading(true)
     try {
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/chats/${conversationId}/upload`,
@@ -175,9 +177,12 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
 
       const msg = await res.json()
       setMessages((prev) => [...prev, msg])
+      toast.success("File uploaded successfully")
     } catch (err) {
       console.warn(err)
       toast.error("Upload failed")
+    } finally {
+      setUploadLoading(false)
     }
   }
 
@@ -212,6 +217,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
         <ChatInput
           input={input}
           sendLoading={sendLoading}
+          uploadLoading={uploadLoading}
           onInputChange={handleInputChange}
           onSend={send}
           onFileSelected={uploadFile}
