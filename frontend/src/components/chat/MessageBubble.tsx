@@ -77,6 +77,7 @@ export function MessageBubble({
             <FileAttachment
               url={message.attachmentUrl}
               name={message.attachmentName}
+              isMe={isMe}
             />
             {message.content ? (
               <div className="mt-2 block max-w-[min(100%,72ch)] text-[13px] leading-relaxed whitespace-pre-wrap break-words text-muted-foreground">
