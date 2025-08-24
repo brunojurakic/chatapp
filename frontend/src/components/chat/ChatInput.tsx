@@ -52,6 +52,7 @@ export function ChatInput({
           onClick={onSend}
           disabled={sendLoading || input.trim() === ""}
           className="shrink-0"
+          variant={"accent"}
         >
           {sendLoading ? (
             <Loader2 className="h-4 w-4 animate-spin" />

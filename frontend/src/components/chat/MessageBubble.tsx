@@ -1,6 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import type { Message } from "@/types/chat"
 import { ImageAttachmentWithModal } from "./ImageAttachmentWithModal"
+import { FileAttachment } from "./FileAttachment"
 
 interface MessageBubbleProps {
   message: Message
@@ -44,7 +45,7 @@ export function MessageBubble({
       >
         {isFirstInGroup ? (
           <div
-            className={`flex items-baseline gap-2 mb-1 ${isMe ? "justify-end" : ""}`}
+            className={`flex items-baseline gap-2 mb-2 mt-2 ${isMe ? "justify-end" : ""}`}
           >
             {isMe ? (
               <>
@@ -71,6 +72,18 @@ export function MessageBubble({
         {message.attachmentUrl &&
         message.attachmentType?.startsWith("image/") ? (
           <ImageAttachmentWithModal message={message} isMe={isMe} />
+        ) : message.attachmentUrl ? (
+          <div className="">
+            <FileAttachment
+              url={message.attachmentUrl}
+              name={message.attachmentName}
+            />
+            {message.content ? (
+              <div className="mt-2 block max-w-[min(100%,72ch)] text-[13px] leading-relaxed whitespace-pre-wrap break-words text-muted-foreground">
+                {message.content}
+              </div>
+            ) : null}
+          </div>
         ) : (
           <div
             className={
@@ -82,29 +95,6 @@ export function MessageBubble({
             role="article"
           >
             {message.content}
-            {message.attachmentUrl ? (
-              <div className="mt-2">
-                {message.attachmentType &&
-                message.attachmentType.startsWith("image/") ? (
-                  <img
-                    src={message.attachmentUrl}
-                    alt={message.attachmentName ?? "attachment"}
-                    className="max-h-60 w-auto rounded-md object-cover"
-                    crossOrigin="anonymous"
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <a
-                    href={message.attachmentUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="underline"
-                  >
-                    {message.attachmentName || "Download attachment"}
-                  </a>
-                )}
-              </div>
-            ) : null}
           </div>
         )}
       </div>
