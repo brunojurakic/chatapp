@@ -146,6 +146,41 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
     }
   }
 
+  const uploadFile = async (file: File) => {
+    const token = localStorage.getItem("jwt_token")
+    if (!token) {
+      toast.error("Not authenticated")
+      return
+    }
+
+    const form = new FormData()
+    form.append("file", file)
+    form.append("content", "")
+
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/chats/${conversationId}/upload`,
+        {
+          method: "POST",
+          body: form,
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      )
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => null)
+        toast.error(err?.error || "Upload failed")
+        return
+      }
+
+      const msg = await res.json()
+      setMessages((prev) => [...prev, msg])
+    } catch (err) {
+      console.warn(err)
+      toast.error("Upload failed")
+    }
+  }
+
   useLayoutEffect(() => {
     const c = scrollContainerRef.current
     if (!c) return
@@ -179,6 +214,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
           sendLoading={sendLoading}
           onInputChange={handleInputChange}
           onSend={send}
+          onFileSelected={uploadFile}
         />
       </div>
     </div>

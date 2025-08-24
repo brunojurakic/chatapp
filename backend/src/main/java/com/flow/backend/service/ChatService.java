@@ -39,7 +39,10 @@ public class ChatService {
                         : m.getSender().getName(),
                     m.getSender().getProfilePictureUrl(),
                     m.getContent(),
-                    m.getCreatedAt()))
+                    m.getCreatedAt(),
+                    m.getAttachmentUrl(),
+                    m.getAttachmentType(),
+                    m.getAttachmentName()))
         .collect(Collectors.toList());
   }
 
@@ -64,6 +67,50 @@ public class ChatService {
             : saved.getSender().getName(),
         saved.getSender().getProfilePictureUrl(),
         saved.getContent(),
-        saved.getCreatedAt());
+        saved.getCreatedAt(),
+        saved.getAttachmentUrl(),
+        saved.getAttachmentType(),
+        saved.getAttachmentName());
+  }
+
+  @Transactional
+  public ChatMessageDTO saveMessageWithAttachment(
+      UUID friendshipId,
+      User sender,
+      String content,
+      String attachmentUrl,
+      String attachmentType,
+      String attachmentName) {
+    Optional<Friendship> fOpt = friendshipRepository.findById(friendshipId);
+    if (fOpt.isEmpty()) throw new IllegalArgumentException("Conversation not found");
+    Friendship f = fOpt.get();
+
+    if (!f.getUserA().getId().equals(sender.getId())
+        && !f.getUserB().getId().equals(sender.getId())) {
+      throw new IllegalArgumentException("Not participant");
+    }
+
+    ChatMessage m =
+        new ChatMessage(
+            f,
+            sender,
+            content == null ? "" : content,
+            attachmentUrl,
+            attachmentType,
+            attachmentName);
+    ChatMessage saved = chatMessageRepository.save(m);
+    return new ChatMessageDTO(
+        saved.getId(),
+        f.getId(),
+        saved.getSender().getId(),
+        saved.getSender().getDisplayName() != null
+            ? saved.getSender().getDisplayName()
+            : saved.getSender().getName(),
+        saved.getSender().getProfilePictureUrl(),
+        saved.getContent(),
+        saved.getCreatedAt(),
+        saved.getAttachmentUrl(),
+        saved.getAttachmentType(),
+        saved.getAttachmentName());
   }
 }

@@ -5,6 +5,9 @@ export interface Message {
   senderName: string
   senderPicture?: string
   content: string
+  attachmentUrl?: string
+  attachmentType?: string
+  attachmentName?: string
   createdAt: string
 }
 

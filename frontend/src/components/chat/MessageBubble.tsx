@@ -1,14 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-
-interface Message {
-  id: string
-  friendshipId: string
-  senderId: string
-  senderName: string
-  senderPicture?: string
-  content: string
-  createdAt: string
-}
+import type { Message } from "@/types/chat"
 
 interface MessageBubbleProps {
   message: Message
@@ -86,6 +77,29 @@ export function MessageBubble({
           role="article"
         >
           {message.content}
+          {message.attachmentUrl ? (
+            <div className="mt-2">
+              {message.attachmentType &&
+              message.attachmentType.startsWith("image/") ? (
+                <img
+                  src={message.attachmentUrl}
+                  alt={message.attachmentName ?? "attachment"}
+                  className="max-h-60 w-auto rounded-md object-cover"
+                  crossOrigin="anonymous"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <a
+                  href={message.attachmentUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline"
+                >
+                  {message.attachmentName || "Download attachment"}
+                </a>
+              )}
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

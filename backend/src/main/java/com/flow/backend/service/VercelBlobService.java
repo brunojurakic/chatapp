@@ -34,12 +34,9 @@ public class VercelBlobService {
     }
 
     String contentType = file.getContentType();
-    if (contentType == null || !contentType.startsWith("image/")) {
-      throw new IllegalArgumentException("File must be an image");
-    }
 
-    if (file.getSize() > 5 * 1024 * 1024) {
-      throw new IllegalArgumentException("File size must be less than 5MB");
+    if (file.getSize() > 10 * 1024 * 1024) {
+      throw new IllegalArgumentException("File size must be less than 10MB");
     }
 
     String originalFilename = file.getOriginalFilename();
@@ -52,7 +49,7 @@ public class VercelBlobService {
     try {
       HttpHeaders headers = new HttpHeaders();
       headers.set("authorization", "Bearer " + vercelBlobToken);
-      headers.set("content-type", "application/octet-stream");
+      headers.set("content-type", contentType != null ? contentType : "application/octet-stream");
       headers.set("x-api-version", "7");
 
       HttpEntity<byte[]> requestEntity = new HttpEntity<>(file.getBytes(), headers);

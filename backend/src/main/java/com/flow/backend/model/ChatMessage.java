@@ -32,6 +32,15 @@ public class ChatMessage {
   @Column(name = "content", nullable = false, length = 2000)
   private String content;
 
+  @Column(name = "attachment_url")
+  private String attachmentUrl;
+
+  @Column(name = "attachment_type")
+  private String attachmentType;
+
+  @Column(name = "attachment_name")
+  private String attachmentName;
+
   @Column(name = "created_at", nullable = false)
   private Instant createdAt;
 
@@ -46,6 +55,21 @@ public class ChatMessage {
     this.friendship = friendship;
     this.sender = sender;
     this.content = content;
+  }
+
+  public ChatMessage(
+      Friendship friendship,
+      User sender,
+      String content,
+      String attachmentUrl,
+      String attachmentType,
+      String attachmentName) {
+    this.friendship = friendship;
+    this.sender = sender;
+    this.content = content;
+    this.attachmentUrl = attachmentUrl;
+    this.attachmentType = attachmentType;
+    this.attachmentName = attachmentName;
   }
 
   public UUID getId() {
@@ -78,6 +102,30 @@ public class ChatMessage {
 
   public void setContent(String content) {
     this.content = content;
+  }
+
+  public String getAttachmentUrl() {
+    return attachmentUrl;
+  }
+
+  public void setAttachmentUrl(String attachmentUrl) {
+    this.attachmentUrl = attachmentUrl;
+  }
+
+  public String getAttachmentType() {
+    return attachmentType;
+  }
+
+  public void setAttachmentType(String attachmentType) {
+    this.attachmentType = attachmentType;
+  }
+
+  public String getAttachmentName() {
+    return attachmentName;
+  }
+
+  public void setAttachmentName(String attachmentName) {
+    this.attachmentName = attachmentName;
   }
 
   public Instant getCreatedAt() {
