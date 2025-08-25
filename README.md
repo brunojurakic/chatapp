@@ -31,6 +31,8 @@ A full‑stack chat application under active development. Current features inclu
   - Light/dark theme support
   - User theme is synced across devices/accounts
 
+- Filtering messages by their contents
+
 - Onboarding / setup flow and protected routes
   - Setup page for first-time users and protected routes that require authentication
 
