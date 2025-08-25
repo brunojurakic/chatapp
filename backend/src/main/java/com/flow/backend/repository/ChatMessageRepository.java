@@ -17,6 +17,11 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, UUID> 
   @Query("select m from ChatMessage m where m.friendship = :friendship order by m.createdAt desc")
   List<ChatMessage> findByFriendship(@Param("friendship") Friendship friendship, Pageable pageable);
 
+  @Query(
+      "select m from ChatMessage m where m.friendship = :friendship and lower(m.content) like lower(concat('%', :q, '%')) order by m.createdAt desc")
+  List<ChatMessage> searchByFriendshipAndContent(
+      @Param("friendship") Friendship friendship, @Param("q") String q, Pageable pageable);
+
   @Modifying
   @Transactional
   @Query("delete from ChatMessage m where m.friendship.id = :friendshipId")

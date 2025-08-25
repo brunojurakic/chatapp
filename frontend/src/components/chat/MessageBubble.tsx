@@ -7,13 +7,37 @@ interface MessageBubbleProps {
   message: Message
   isMe: boolean
   isFirstInGroup: boolean
+  highlightQuery?: string
 }
 
 export function MessageBubble({
   message,
   isMe,
   isFirstInGroup,
+  highlightQuery,
 }: MessageBubbleProps) {
+  const renderHighlighted = (text: string) => {
+    if (!highlightQuery) return <>{text}</>
+    const q = highlightQuery.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+    const re = new RegExp(`(${q})`, "ig")
+    const parts = text.split(re)
+    return (
+      <>
+        {parts.map((part, i) =>
+          re.test(part) ? (
+            <mark
+              key={i}
+              className="bg-yellow-200 dark:bg-yellow-600 text-foreground/90 px-0"
+            >
+              {part}
+            </mark>
+          ) : (
+            <span key={i}>{part}</span>
+          ),
+        )}
+      </>
+    )
+  }
   return (
     <div
       className={`flex items-start gap-3 first:mt-0 ${isMe ? "flex-row-reverse" : ""} ${isFirstInGroup ? "mt-2" : "mt-0.5"}`}
@@ -81,7 +105,7 @@ export function MessageBubble({
             />
             {message.content ? (
               <div className="mt-2 block max-w-[min(100%,72ch)] text-[13px] leading-relaxed whitespace-pre-wrap break-words text-muted-foreground">
-                {message.content}
+                {renderHighlighted(message.content)}
               </div>
             ) : null}
           </div>
@@ -95,7 +119,7 @@ export function MessageBubble({
             }
             role="article"
           >
-            {message.content}
+            {renderHighlighted(message.content)}
           </div>
         )}
       </div>

@@ -147,6 +147,29 @@ public class ChatController {
     }
   }
 
+  @GetMapping("/{friendshipId}/search")
+  public ResponseEntity<?> searchMessages(
+      @RequestHeader(value = "Authorization", required = false) String authHeader,
+      @PathVariable("friendshipId") UUID friendshipId,
+      @RequestParam(value = "q", required = true) String q,
+      @RequestParam(value = "limit", required = false, defaultValue = "50") int limit,
+      @RequestParam(value = "windowBefore", required = false, defaultValue = "5") int windowBefore,
+      @RequestParam(value = "windowAfter", required = false, defaultValue = "5") int windowAfter,
+      @RequestParam(value = "fetchLimit", required = false, defaultValue = "200") int fetchLimit) {
+    try {
+      User me = getCurrentUserFromToken(authHeader);
+      if (me == null) return ResponseEntity.status(401).body("Not authenticated");
+      var results =
+          chatService.searchMessagesWithContext(
+              friendshipId, q, limit, windowBefore, windowAfter, fetchLimit);
+      return ResponseEntity.ok(results);
+    } catch (IllegalArgumentException ia) {
+      return ResponseEntity.badRequest().body(Map.of("error", ia.getMessage()));
+    } catch (Exception e) {
+      return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+    }
+  }
+
   @GetMapping("/with/{friendUserId}")
   public ResponseEntity<?> getConversationWith(
       @RequestHeader(value = "Authorization", required = false) String authHeader,

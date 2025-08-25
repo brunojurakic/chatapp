@@ -21,6 +21,11 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
   const currentDisplayName = user?.displayName ?? user?.name ?? null
 
   const [messages, setMessages] = useState<Message[]>([])
+  const [searchResults, setSearchResults] = useState<Message[] | null>(null)
+  const [matchesCount, setMatchesCount] = useState<number>(0)
+  const [matchedIds, setMatchedIds] = useState<string[]>([])
+  const [currentMatchIndex, setCurrentMatchIndex] = useState<number>(-1)
+  const [searchQuery, setSearchQuery] = useState<string | null>(null)
   const [participant, setParticipant] = useState<Participant | null>(null)
   const [input, setInput] = useState("")
   const [connected, setConnected] = useState(false)
@@ -108,6 +113,87 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
     handleError,
   ])
 
+  const searchMessages = async (q: string) => {
+    const token = localStorage.getItem("jwt_token")
+    if (!token) {
+      toast.error("Not authenticated")
+      return
+    }
+
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/chats/${conversationId}/search?q=${encodeURIComponent(
+          q,
+        )}`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      )
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => null)
+        toast.error(err?.error || "Search failed")
+        return
+      }
+
+      const data = await res.json()
+      const newMatchedIds: string[] = (data.matchedIds ?? []).map(
+        (id: string) => id,
+      )
+      setSearchResults(data.messages)
+      setMatchesCount(data.matchesCount ?? 0)
+      setMatchedIds(newMatchedIds)
+      setSearchQuery(q)
+
+      if (newMatchedIds.length > 0) {
+        const sameAsBefore =
+          matchedIds.length === newMatchedIds.length &&
+          matchedIds.every((v, i) => v === newMatchedIds[i])
+
+        if (sameAsBefore) {
+          if (
+            currentMatchIndex < 0 ||
+            currentMatchIndex >= newMatchedIds.length
+          ) {
+            setCurrentMatchIndex(0)
+            setTimeout(() => {
+              const el = document.getElementById(`message-${newMatchedIds[0]}`)
+              el?.scrollIntoView({ behavior: "smooth", block: "center" })
+            }, 150)
+          }
+        } else {
+          setCurrentMatchIndex(0)
+          setTimeout(() => {
+            const el = document.getElementById(`message-${newMatchedIds[0]}`)
+            el?.scrollIntoView({ behavior: "smooth", block: "center" })
+          }, 150)
+        }
+      } else {
+        setCurrentMatchIndex(-1)
+      }
+    } catch (err) {
+      console.warn(err)
+      toast.error("Search failed")
+    }
+  }
+
+  const clearSearchAll = () => {
+    setSearchResults(null)
+    setSearchQuery(null)
+    setMatchesCount(0)
+    setMatchedIds([])
+    setCurrentMatchIndex(-1)
+  }
+
+  const goToMatch = (indexDelta: number) => {
+    if (!matchedIds || matchedIds.length === 0) return
+    let next = currentMatchIndex + indexDelta
+    if (next < 0) next = matchedIds.length - 1
+    if (next >= matchedIds.length) next = 0
+    setCurrentMatchIndex(next)
+    const id = matchedIds[next]
+    const el = document.getElementById(`message-${id}`)
+    el?.scrollIntoView({ behavior: "smooth", block: "center" })
+  }
+
   const retryConnect = () => {
     const token = localStorage.getItem("jwt_token")
     if (!token) {
@@ -189,6 +275,8 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
   }
 
   useLayoutEffect(() => {
+    if (searchResults) return
+
     const c = scrollContainerRef.current
     if (!c) return
     const behavior = didInitialScrollRef.current
@@ -196,7 +284,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
       : ("auto" as const)
     c.scrollTo({ top: c.scrollHeight, behavior })
     didInitialScrollRef.current = true
-  }, [messages.length])
+  }, [messages.length, searchResults])
 
   return (
     <div className="h-full w-full bg-background dark:bg-black">
@@ -206,11 +294,17 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
           connected={connected}
           isTyping={typingUsers.size > 0 && !isCurrentUserTyping}
           onRetryConnect={retryConnect}
+          onSearch={searchMessages}
+          onClearSearch={clearSearchAll}
+          onPrevMatch={() => goToMatch(-1)}
+          onNextMatch={() => goToMatch(1)}
+          matchesCount={matchesCount}
+          currentMatchIndex={currentMatchIndex}
         />
-
         <MessageList
           ref={scrollContainerRef}
-          messages={messages}
+          messages={searchResults ?? messages}
+          highlightQuery={searchQuery ?? undefined}
           currentUserId={currentUserId}
           currentDisplayName={currentDisplayName}
           currentUsername={currentUsername}

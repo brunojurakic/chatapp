@@ -16,10 +16,20 @@ interface MessageListProps {
   currentUserId: string | null
   currentDisplayName: string | null
   currentUsername: string | null
+  highlightQuery?: string
 }
 
 export const MessageList = forwardRef<HTMLDivElement, MessageListProps>(
-  ({ messages, currentUserId, currentDisplayName, currentUsername }, ref) => {
+  (
+    {
+      messages,
+      currentUserId,
+      currentDisplayName,
+      currentUsername,
+      highlightQuery,
+    },
+    ref,
+  ) => {
     return (
       <div
         ref={ref}
@@ -43,12 +53,15 @@ export const MessageList = forwardRef<HTMLDivElement, MessageListProps>(
               curTime - prevTime > 60_000
 
             return (
-              <MessageBubble
-                key={message.id}
-                message={message}
-                isMe={isMe}
-                isFirstInGroup={isFirstInGroup}
-              />
+              <div id={`message-${message.id}`} key={message.id}>
+                <MessageBubble
+                  key={message.id}
+                  message={message}
+                  isMe={isMe}
+                  isFirstInGroup={isFirstInGroup}
+                  highlightQuery={highlightQuery}
+                />
+              </div>
             )
           })}
         </div>
