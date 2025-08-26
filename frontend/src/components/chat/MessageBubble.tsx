@@ -1,4 +1,10 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+} from "@/components/ui/dropdown-menu"
+import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 import type { Message } from "@/types/chat"
 import { ImageAttachmentWithModal } from "./ImageAttachmentWithModal"
 import { FileAttachment } from "./FileAttachment"
@@ -43,23 +49,60 @@ export function MessageBubble({
       className={`flex items-start gap-3 first:mt-0 ${isMe ? "flex-row-reverse" : ""} ${isFirstInGroup ? "mt-2" : "mt-0.5"}`}
     >
       {isFirstInGroup ? (
-        <Avatar className="h-9 w-9 border-1 flex-shrink-0">
-          {message.senderPicture ? (
-            <AvatarImage
-              src={message.senderPicture}
-              alt={message.senderName}
-              className="h-9 w-9 rounded-full object-cover"
-              crossOrigin="anonymous"
-              referrerPolicy="no-referrer"
-            />
-          ) : null}
-          <AvatarFallback className="bg-muted text-foreground/80 text-xs">
-            {message.senderName
-              ?.split(" ")
-              .map((s) => s[0])
-              .join("")}
-          </AvatarFallback>
-        </Avatar>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="cursor-pointer">
+              <Avatar className="h-9 w-9 border-1 flex-shrink-0">
+                {message.senderPicture ? (
+                  <AvatarImage
+                    src={message.senderPicture}
+                    alt={message.senderName}
+                    className="h-9 w-9 rounded-full object-cover"
+                    crossOrigin="anonymous"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : null}
+                <AvatarFallback className="bg-muted text-foreground/80 text-xs">
+                  {message.senderName
+                    ?.split(" ")
+                    .map((s) => s[0])
+                    .join("")}
+                </AvatarFallback>
+              </Avatar>
+            </button>
+          </DropdownMenuTrigger>
+          
+          <DropdownMenuContent sideOffset={8} className="w-64 p-0">
+            <Card className="border-0 shadow-none">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-12 w-12">
+                    {message.senderPicture ? (
+                      <AvatarImage
+                        src={message.senderPicture}
+                        alt={message.senderName}
+                        className="h-12 w-12 rounded-full object-cover"
+                        crossOrigin="anonymous"
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <AvatarFallback className="bg-muted text-foreground/80 text-sm">
+                        {message.senderName
+                          ?.split(" ")
+                          .map((s) => s[0])
+                          .join("")}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <CardTitle className="text-base truncate">{message.senderName}</CardTitle>
+                    <div className="text-sm text-muted-foreground">User ID: {message.senderId}</div>
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
+          </DropdownMenuContent>
+        </DropdownMenu>
       ) : (
         <div aria-hidden className="h-9 w-9 flex-shrink-0" />
       )}
