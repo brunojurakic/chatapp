@@ -46,7 +46,7 @@ export function MessageBubble({
   }
   return (
     <div
-      className={`flex items-start gap-3 first:mt-0 ${isMe ? "flex-row-reverse" : ""} ${isFirstInGroup ? "mt-2" : "mt-0.5"}`}
+      className={`flex items-start gap-3 first:mt-1 ${isMe ? "flex-row-reverse" : ""} ${isFirstInGroup ? "mt-2" : "mt-0.5"}`}
     >
       {isFirstInGroup ? (
         <DropdownMenu>
