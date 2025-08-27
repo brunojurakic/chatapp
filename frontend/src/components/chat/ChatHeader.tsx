@@ -63,7 +63,7 @@ export function ChatHeader({
     return () => clearTimeout(handler)
   }, [input, onSearch])
   return (
-    <div className="relative flex items-center justify-between border-b px-6 py-3 bg-background/70 dark:bg-black">
+    <div className="relative flex items-center justify-between border-b px-6 py-3 bg-background/70 dark:bg-background">
       <div className="flex items-center gap-3">
         {participant ? (
           <div className="flex items-center gap-3">

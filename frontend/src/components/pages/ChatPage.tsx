@@ -10,7 +10,7 @@ export default function ChatPage() {
   if (!id) return null
 
   return (
-    <div className="flex h-screen w-screen flex-col overflow-hidden bg-background dark:bg-black">
+    <div className="flex h-screen w-screen flex-col overflow-hidden bg-background dark:bg-background">
       <Header />
       <div className="flex-1 overflow-hidden">
         <Suspense fallback={null}>

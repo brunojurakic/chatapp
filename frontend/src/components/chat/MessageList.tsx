@@ -33,7 +33,7 @@ export const MessageList = forwardRef<HTMLDivElement, MessageListProps>(
     return (
       <div
         ref={ref}
-        className="flex-1 overflow-y-auto px-4 py-4 bg-background dark:bg-black"
+        className="flex-1 overflow-y-auto px-4 py-4 bg-background dark:bg-background"
       >
         <div className="mx-auto max-w-3xl">
           {messages.map((message, index) => {

@@ -287,7 +287,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
   }, [messages.length, searchResults])
 
   return (
-    <div className="h-full w-full bg-background dark:bg-black">
+    <div className="h-full w-full bg-background dark:bg-background">
       <div className="flex h-full w-full flex-col border-0 rounded-none bg-transparent py-0 gap-0">
         <ChatHeader
           participant={participant}
