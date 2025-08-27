@@ -71,7 +71,7 @@ export function MessageBubble({
               </Avatar>
             </button>
           </DropdownMenuTrigger>
-          
+
           <DropdownMenuContent sideOffset={8} className="w-64 p-0">
             <Card className="border-0 shadow-none">
               <CardHeader>
@@ -95,8 +95,12 @@ export function MessageBubble({
                     )}
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <CardTitle className="text-base truncate">{message.senderName}</CardTitle>
-                    <div className="text-sm text-muted-foreground wrap-anywhere">User ID: {message.senderId}</div>
+                    <CardTitle className="text-base truncate">
+                      {message.senderName}
+                    </CardTitle>
+                    <div className="text-sm text-muted-foreground wrap-anywhere">
+                      User ID: {message.senderId}
+                    </div>
                   </div>
                 </div>
               </CardHeader>

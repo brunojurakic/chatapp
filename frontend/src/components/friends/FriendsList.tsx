@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2 } from "lucide-react"
@@ -18,6 +18,10 @@ export default function FriendsList() {
   const [loading, setLoading] = useState(false)
   const [processingIds, setProcessingIds] = useState<string[]>([])
   const [chatLoadingId, setChatLoadingId] = useState<string | null>(null)
+  const [confirmFriendId, setConfirmFriendId] = useState<string | null>(null)
+  const [modalMounted, setModalMounted] = useState(false)
+  const [modalEntered, setModalEntered] = useState(false)
+  const timeoutRef = useRef<number | null>(null)
 
   const loadFriends = async () => {
     setLoading(true)
@@ -41,33 +45,6 @@ export default function FriendsList() {
     }
   }
 
-  const handleUnfriend = async (friendId: string) => {
-    if (processingIds.includes(friendId)) return
-    setProcessingIds((s) => [...s, friendId])
-    try {
-      const t = localStorage.getItem("jwt_token")
-      if (!t) throw new Error("No token")
-      const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/friends/${friendId}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${t}` },
-        },
-      )
-      if (res.ok) {
-        setFriends((prev) => prev.filter((p) => p.id !== friendId))
-        toast.success("Removed friend")
-      } else {
-        const text = await res.text().catch(() => "")
-        toast.error(text || "Could not remove friend")
-      }
-    } catch {
-      toast.error("Could not remove friend")
-    } finally {
-      setProcessingIds((s) => s.filter((id) => id !== friendId))
-    }
-  }
-
   const navigate = useNavigate()
 
   const openChatWith = async (friendId: string) => {
@@ -88,6 +65,51 @@ export default function FriendsList() {
       toast.error("Could not open chat")
     } finally {
       setChatLoadingId(null)
+    }
+  }
+
+  const closeModal = () => {
+    setModalEntered(false)
+    timeoutRef.current = window.setTimeout(() => {
+      setModalMounted(false)
+      setConfirmFriendId(null)
+    }, 200)
+  }
+
+  const openModal = (friendId: string) => {
+    setConfirmFriendId(friendId)
+    setModalMounted(true)
+    setModalEntered(false)
+    requestAnimationFrame(() => {
+      setModalEntered(true)
+    })
+  }
+
+  const confirmUnfriend = async () => {
+    if (!confirmFriendId) return
+    try {
+      setProcessingIds((prev) => [...prev, confirmFriendId])
+      const t = localStorage.getItem("jwt_token")
+      if (!t) throw new Error("No token")
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/friends/${confirmFriendId}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${t}` },
+        },
+      )
+      if (res.ok) {
+        setFriends((prev) => prev.filter((p) => p.id !== confirmFriendId))
+        toast.success("Removed friend")
+      } else {
+        const text = await res.text().catch(() => "")
+        toast.error(text || "Could not remove friend")
+      }
+    } catch {
+      toast.error("Could not remove friend")
+    } finally {
+      setProcessingIds((prev) => prev.filter((id) => id !== confirmFriendId))
+      closeModal()
     }
   }
 
@@ -187,7 +209,7 @@ export default function FriendsList() {
                   </Button>
                   <Button
                     size="sm"
-                    onClick={() => handleUnfriend(f.id)}
+                    onClick={() => openModal(f.id)}
                     aria-label={`Unfriend ${f.name}`}
                     disabled={processingIds.includes(f.id)}
                   >
@@ -203,6 +225,50 @@ export default function FriendsList() {
           )}
         </CardContent>
       </Card>
+
+      {modalMounted && (
+        <div
+          className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 transition-opacity duration-200 ${
+            modalEntered ? "opacity-100" : "opacity-0"
+          }`}
+          onClick={closeModal}
+        >
+          <Card
+            className={`w-96 transition-all duration-200 ease-out ${
+              modalEntered ? "scale-100 opacity-100" : "scale-95 opacity-0"
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <CardHeader>
+              <CardTitle>Confirm Unfriend</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Are you sure you want to unfriend{" "}
+                <span className="font-medium">
+                  {friends.find((f) => f.id === confirmFriendId)?.name}
+                </span>
+                ? This action cannot be undone.
+              </p>
+              <div className="flex justify-end space-x-2 mt-4">
+                <Button variant="outline" onClick={closeModal}>
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={confirmUnfriend}
+                  disabled={processingIds.includes(confirmFriendId || "")}
+                >
+                  {processingIds.includes(confirmFriendId || "") ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : null}
+                  Remove
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </>
   )
 }
