@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
+import { tokenUtils, apiUtils } from "@/utils/apiUtils"
 
 interface SearchResult {
   id: string
@@ -23,15 +24,11 @@ export default function SearchAndSend() {
   const [acceptingId, setAcceptingId] = useState<string | null>(null)
 
   const search = async () => {
-    const token = localStorage.getItem("jwt_token")
-    if (!token || !query.trim()) return
+    if (!tokenUtils.exists() || !query.trim()) return
     setLoading(true)
     try {
-      const res = await fetch(
-        `${
-          import.meta.env.VITE_BACKEND_URL
-        }/api/users/search?query=${encodeURIComponent(query.trim())}`,
-        { headers: { Authorization: `Bearer ${token}` } },
+      const res = await apiUtils.get(
+        `/api/users/search?query=${encodeURIComponent(query.trim())}`,
       )
       if (res.ok) setResults(await res.json())
     } catch {
@@ -42,15 +39,12 @@ export default function SearchAndSend() {
   }
 
   const send = async (username: string) => {
-    const token = localStorage.getItem("jwt_token")
-    if (!token) return
+    if (!tokenUtils.exists()) return
     setSendingId(username)
     try {
-      const res = await fetch(
-        `${
-          import.meta.env.VITE_BACKEND_URL
-        }/api/friends/request?username=${encodeURIComponent(username)}`,
-        { method: "POST", headers: { Authorization: `Bearer ${token}` } },
+      const res = await apiUtils.authenticatedRequest(
+        `/api/friends/request?username=${encodeURIComponent(username)}`,
+        { method: "POST" },
       )
       if (res.ok) {
         toast.success("Friend request sent")
@@ -80,15 +74,12 @@ export default function SearchAndSend() {
   }
 
   const accept = async (requestId: string) => {
-    const token = localStorage.getItem("jwt_token")
-    if (!token) return
+    if (!tokenUtils.exists()) return
     setAcceptingId(requestId)
     try {
-      const res = await fetch(
-        `${
-          import.meta.env.VITE_BACKEND_URL
-        }/api/friends/requests/${requestId}/accept`,
-        { method: "POST", headers: { Authorization: `Bearer ${token}` } },
+      const res = await apiUtils.authenticatedRequest(
+        `/api/friends/requests/${requestId}/accept`,
+        { method: "POST" },
       )
       if (res.ok) {
         toast.success("Friend request accepted")

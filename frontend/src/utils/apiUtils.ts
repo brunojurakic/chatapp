@@ -61,16 +61,12 @@ export const apiUtils = {
   },
 }
 
-export const uiPatterns = {
-  loadingSpinner: {
-    className:
-      "h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent",
+export const errorUtils = {
+  log: (message: string, error: unknown) => {
+    console.error(`${message}:`, error)
   },
 
-  errorDisplay: {
-    containerClass:
-      "flex items-center space-x-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md",
-    iconClass: "h-4 w-4 text-destructive",
-    textClass: "text-sm text-destructive",
+  handleApiError: (operation: string, error: unknown) => {
+    errorUtils.log(`${operation} failed`, error)
   },
 }

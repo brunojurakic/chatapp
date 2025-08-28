@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useCallback } from "react"
 import type { ReactNode } from "react"
+import { tokenUtils, apiUtils, errorUtils } from "../utils/apiUtils"
 
 interface User {
   id?: string
@@ -34,15 +35,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  const getToken = () => localStorage.getItem("jwt_token")
+  const getToken = () => tokenUtils.get()
 
   const setToken = (token: string) => {
-    localStorage.setItem("jwt_token", token)
+    tokenUtils.set(token)
     checkAuth()
   }
 
   const removeToken = () => {
-    localStorage.removeItem("jwt_token")
+    tokenUtils.remove()
   }
 
   const checkAuth = useCallback(async () => {
@@ -54,15 +55,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return
       }
 
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/auth/user`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        },
-      )
+      const response = await apiUtils.authenticatedRequest("/api/auth/user")
 
       if (response.ok) {
         const userData = await response.json()
@@ -82,7 +75,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(null)
       }
     } catch (error) {
-      console.error("Auth check failed:", error)
+      errorUtils.handleApiError("Auth check", error)
       removeToken()
       setUser(null)
     } finally {
@@ -106,16 +99,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const token = getToken()
       if (token) {
-        await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/logout`, {
+        await apiUtils.authenticatedRequest("/api/auth/logout", {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
         })
       }
     } catch (error) {
-      console.error("Logout failed:", error)
+      errorUtils.handleApiError("Logout", error)
     } finally {
       removeToken()
       setUser(null)

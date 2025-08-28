@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/use-auth"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Loader2 } from "lucide-react"
+import { tokenUtils, apiUtils } from "@/utils/apiUtils"
 
 interface OutgoingDTO {
   id: string
@@ -20,13 +21,9 @@ export default function OutgoingRequests() {
   const { user, isLoading } = useAuth()
 
   const fetchOutgoing = async () => {
-    const token = localStorage.getItem("jwt_token")
-    if (!token) return
+    if (!tokenUtils.exists()) return
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/friends/outgoing`,
-        { headers: { Authorization: `Bearer ${token}` } },
-      )
+      const res = await apiUtils.get("/api/friends/outgoing")
       if (res.ok) setOutgoing(await res.json())
     } catch {
       // ignore

@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form"
 import type { Resolver } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { setupSchema, type SetupSchema } from "@/schemas/setupSchema"
+import { tokenUtils, apiUtils } from "@/utils/apiUtils"
 
 const SetupPage: React.FC = () => {
   const { user, refreshUser } = useAuth()
@@ -45,21 +46,13 @@ const SetupPage: React.FC = () => {
 
   const submit = async (data: SetupSchema) => {
     setError(null)
-    const token = localStorage.getItem("jwt_token")
-    if (!token) return navigate("/login")
+    if (!tokenUtils.exists()) return navigate("/login")
 
     setLoading(true)
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/setup`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          username: data.username,
-          displayName: data.displayName,
-        }),
+      const res = await apiUtils.post("/api/setup", {
+        username: data.username,
+        displayName: data.displayName,
       })
 
       if (res.ok) {

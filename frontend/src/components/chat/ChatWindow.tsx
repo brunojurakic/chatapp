@@ -13,6 +13,7 @@ import { ChatInput } from "./ChatInput"
 import type { Message, Participant, TypingEvent } from "@/types/chat"
 import { ChatWebSocketManager, fetchChatData } from "@/utils/websocket"
 import { useTypingIndicator } from "@/hooks/useTypingIndicator"
+import { tokenUtils, apiUtils } from "@/utils/apiUtils"
 
 export function ChatRoom({ conversationId }: { conversationId: string }) {
   const { user } = useAuth()
@@ -114,18 +115,14 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
   ])
 
   const searchMessages = async (q: string) => {
-    const token = localStorage.getItem("jwt_token")
-    if (!token) {
+    if (!tokenUtils.exists()) {
       toast.error("Not authenticated")
       return
     }
 
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/chats/${conversationId}/search?q=${encodeURIComponent(
-          q,
-        )}`,
-        { headers: { Authorization: `Bearer ${token}` } },
+      const res = await apiUtils.get(
+        `/api/chats/${conversationId}/search?q=${encodeURIComponent(q)}`,
       )
 
       if (!res.ok) {
@@ -195,8 +192,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
   }
 
   const retryConnect = () => {
-    const token = localStorage.getItem("jwt_token")
-    if (!token) {
+    if (!tokenUtils.exists()) {
       toast.error("Not authenticated")
       return
     }
@@ -207,8 +203,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
   }
 
   const send = async () => {
-    const token = localStorage.getItem("jwt_token")
-    if (!token) {
+    if (!tokenUtils.exists()) {
       toast.error("Not authenticated")
       return
     }
@@ -234,8 +229,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
   }
 
   const uploadFile = async (file: File) => {
-    const token = localStorage.getItem("jwt_token")
-    if (!token) {
+    if (!tokenUtils.exists()) {
       toast.error("Not authenticated")
       return
     }
@@ -246,12 +240,11 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
 
     setUploadLoading(true)
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/chats/${conversationId}/upload`,
+      const res = await apiUtils.authenticatedRequest(
+        `/api/chats/${conversationId}/upload`,
         {
           method: "POST",
           body: form,
-          headers: { Authorization: `Bearer ${token}` },
         },
       )
 

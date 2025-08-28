@@ -1,12 +1,10 @@
 package com.flow.backend.util;
 
-import java.util.UUID;
-
-import org.springframework.stereotype.Component;
-
 import com.flow.backend.dto.ChatMessageDTO;
 import com.flow.backend.model.ChatMessage;
 import com.flow.backend.model.Friendship;
+import java.util.UUID;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ChatMessageUtil {

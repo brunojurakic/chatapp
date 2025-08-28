@@ -3,7 +3,8 @@ package com.flow.backend.controller;
 import com.flow.backend.model.User;
 import com.flow.backend.service.ChatService;
 import com.flow.backend.service.UserService;
-import com.flow.backend.util.JwtUtil;
+import com.flow.backend.util.AuthUtil;
+import com.flow.backend.util.UserDisplayUtil;
 import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
@@ -27,11 +28,13 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api/chats")
 public class ChatController {
 
-  @Autowired private JwtUtil jwtUtil;
+  @Autowired private AuthUtil authUtil;
 
   @Autowired private UserService userService;
 
   @Autowired private ChatService chatService;
+
+  @Autowired private UserDisplayUtil userDisplayUtil;
 
   @Autowired private com.flow.backend.service.FriendService friendService;
   @Autowired private com.flow.backend.repository.FriendshipRepository friendshipRepository;
@@ -84,11 +87,12 @@ public class ChatController {
   }
 
   private User getCurrentUserFromToken(String authHeader) {
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) return null;
-    String token = authHeader.substring(7);
-    if (!jwtUtil.validateToken(token)) return null;
-    String email = jwtUtil.extractUsername(token);
-    return userService.findByEmail(email).orElse(null);
+    try {
+      String email = authUtil.extractEmailFromToken(authHeader);
+      return userService.findByEmail(email).orElse(null);
+    } catch (SecurityException e) {
+      return null;
+    }
   }
 
   @PostMapping("/start")
@@ -140,7 +144,7 @@ public class ChatController {
           Map.of(
               "id", other.getId(),
               "username", other.getUsername(),
-              "name", other.getDisplayName() != null ? other.getDisplayName() : other.getName(),
+              "name", userDisplayUtil.getDisplayName(other),
               "picture", other.getProfilePictureUrl()));
     } catch (Exception e) {
       return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));

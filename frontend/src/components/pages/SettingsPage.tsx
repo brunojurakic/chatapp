@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select"
 import { Camera, Save, Loader2 } from "lucide-react"
 import { toast } from "sonner"
+import { tokenUtils, apiUtils, errorUtils } from "@/utils/apiUtils"
 
 interface SettingsFormData {
   displayName: string
@@ -90,8 +91,7 @@ const SettingsPage = () => {
     setIsLoading(true)
 
     try {
-      const token = localStorage.getItem("jwt_token")
-      if (!token) {
+      if (!tokenUtils.exists()) {
         throw new Error("No auth token")
       }
 
@@ -103,13 +103,10 @@ const SettingsPage = () => {
         formDataToSend.append("profilePicture", formData.profilePictureFile)
       }
 
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/user/settings`,
+      const response = await apiUtils.authenticatedRequest(
+        "/api/user/settings",
         {
           method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
           body: formDataToSend,
         },
       )
@@ -134,7 +131,7 @@ const SettingsPage = () => {
         throw new Error(errorText || "Failed to update settings")
       }
     } catch (error) {
-      console.error("Settings update failed:", error)
+      errorUtils.handleApiError("Settings update", error)
       toast.error("Failed to update settings. Please try again.")
     } finally {
       setIsLoading(false)

@@ -1,8 +1,7 @@
 package com.flow.backend.util;
 
-import org.springframework.stereotype.Component;
-
 import com.flow.backend.model.User;
+import org.springframework.stereotype.Component;
 
 @Component
 public class UserDisplayUtil {

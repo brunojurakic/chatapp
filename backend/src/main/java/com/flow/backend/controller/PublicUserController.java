@@ -1,7 +1,8 @@
 package com.flow.backend.controller;
 
 import com.flow.backend.service.UserService;
-import com.flow.backend.util.JwtUtil;
+import com.flow.backend.util.AuthUtil;
+import com.flow.backend.util.UserDisplayUtil;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,17 +17,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/users")
 public class PublicUserController {
 
-  @Autowired private JwtUtil jwtUtil;
+  @Autowired private AuthUtil authUtil;
 
   @Autowired private UserService userService;
 
   @Autowired private com.flow.backend.service.FriendService friendService;
 
+  @Autowired private UserDisplayUtil userDisplayUtil;
+
   private String extractEmail(String authHeader) {
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) return null;
-    String token = authHeader.substring(7);
-    if (!jwtUtil.validateToken(token)) return null;
-    return jwtUtil.extractUsername(token);
+    try {
+      return authUtil.extractEmailFromToken(authHeader);
+    } catch (SecurityException e) {
+      return null;
+    }
   }
 
   @GetMapping("/search")
@@ -52,7 +56,7 @@ public class PublicUserController {
                           "id",
                           u.getId(),
                           "name",
-                          u.getDisplayName() != null ? u.getDisplayName() : u.getName(),
+                          userDisplayUtil.getDisplayName(u),
                           "username",
                           u.getUsername(),
                           "pendingRequest",
@@ -66,7 +70,7 @@ public class PublicUserController {
                         "id",
                         u.getId(),
                         "name",
-                        u.getDisplayName() != null ? u.getDisplayName() : u.getName(),
+                        userDisplayUtil.getDisplayName(u),
                         "username",
                         u.getUsername(),
                         "pendingRequest",

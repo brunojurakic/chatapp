@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
+import { tokenUtils, apiUtils } from "@/utils/apiUtils"
 
 interface Friend {
   id: string
@@ -25,18 +26,12 @@ export default function FriendsList() {
 
   const loadFriends = async () => {
     setLoading(true)
-    const token = localStorage.getItem("jwt_token")
-    if (!token) {
+    if (!tokenUtils.exists()) {
       setLoading(false)
       return
     }
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/friends`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      )
+      const res = await apiUtils.get("/api/friends")
       if (res.ok) setFriends(await res.json())
     } catch {
       // ignore
@@ -48,16 +43,10 @@ export default function FriendsList() {
   const navigate = useNavigate()
 
   const openChatWith = async (friendId: string) => {
-    const token = localStorage.getItem("jwt_token")
-    if (!token) return toast.error("Not authenticated")
+    if (!tokenUtils.exists()) return toast.error("Not authenticated")
     setChatLoadingId(friendId)
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/chats/with/${friendId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      )
+      const res = await apiUtils.get(`/api/chats/with/${friendId}`)
       if (!res.ok) return toast.error("Could not open chat")
       const body = await res.json()
       navigate(`/chat/${body.conversationId}`)
@@ -89,13 +78,11 @@ export default function FriendsList() {
     if (!confirmFriendId) return
     try {
       setProcessingIds((prev) => [...prev, confirmFriendId])
-      const t = localStorage.getItem("jwt_token")
-      if (!t) throw new Error("No token")
-      const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/friends/${confirmFriendId}`,
+      if (!tokenUtils.exists()) throw new Error("No token")
+      const res = await apiUtils.authenticatedRequest(
+        `/api/friends/${confirmFriendId}`,
         {
           method: "DELETE",
-          headers: { Authorization: `Bearer ${t}` },
         },
       )
       if (res.ok) {

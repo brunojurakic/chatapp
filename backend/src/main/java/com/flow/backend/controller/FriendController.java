@@ -4,7 +4,8 @@ import com.flow.backend.dto.FriendRequestDTO;
 import com.flow.backend.model.User;
 import com.flow.backend.service.FriendService;
 import com.flow.backend.service.UserService;
-import com.flow.backend.util.JwtUtil;
+import com.flow.backend.util.AuthUtil;
+import com.flow.backend.util.UserDisplayUtil;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -22,18 +23,21 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/friends")
 public class FriendController {
 
-  @Autowired private JwtUtil jwtUtil;
+  @Autowired private AuthUtil authUtil;
 
   @Autowired private UserService userService;
 
   @Autowired private FriendService friendService;
 
+  @Autowired private UserDisplayUtil userDisplayUtil;
+
   private User getCurrentUserFromToken(String authHeader) {
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) return null;
-    String token = authHeader.substring(7);
-    if (!jwtUtil.validateToken(token)) return null;
-    String email = jwtUtil.extractUsername(token);
-    return userService.findByEmail(email).orElse(null);
+    try {
+      String email = authUtil.extractEmailFromToken(authHeader);
+      return userService.findByEmail(email).orElse(null);
+    } catch (SecurityException e) {
+      return null;
+    }
   }
 
   @GetMapping("/requests")
@@ -75,7 +79,7 @@ public class FriendController {
                   u ->
                       Map.of(
                           "id", u.getId(),
-                          "name", u.getDisplayName() != null ? u.getDisplayName() : u.getName(),
+                          "name", userDisplayUtil.getDisplayName(u),
                           "username", u.getUsername(),
                           "picture", u.getProfilePictureUrl())));
     } catch (Exception e) {

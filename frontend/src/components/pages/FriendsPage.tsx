@@ -6,6 +6,7 @@ import OutgoingRequests from "../friends/OutgoingRequests"
 import IncomingRequests from "../friends/IncomingRequests"
 import { useEffect, useState, useRef } from "react"
 import { useAuth } from "@/hooks/use-auth"
+import { tokenUtils, apiUtils } from "@/utils/apiUtils"
 
 export default function FriendsPage() {
   const { user, isLoading } = useAuth()
@@ -15,16 +16,12 @@ export default function FriendsPage() {
   useEffect(() => {
     ;(async () => {
       if (isLoading) return
-      const token = localStorage.getItem("jwt_token")
-      if (!token) {
+      if (!tokenUtils.exists()) {
         setIncomingCount(0)
         return
       }
       try {
-        const res = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/api/friends/requests`,
-          { headers: { Authorization: `Bearer ${token}` } },
-        )
+        const res = await apiUtils.get("/api/friends/requests")
         if (res.ok) {
           const list = await res.json()
           setIncomingCount(Array.isArray(list) ? list.length : 0)
@@ -37,13 +34,9 @@ export default function FriendsPage() {
     })()
     const refresh = () => {
       ;(async () => {
-        const token = localStorage.getItem("jwt_token")
-        if (!token) return
+        if (!tokenUtils.exists()) return
         try {
-          const res = await fetch(
-            `${import.meta.env.VITE_BACKEND_URL}/api/friends/requests`,
-            { headers: { Authorization: `Bearer ${token}` } },
-          )
+          const res = await apiUtils.get("/api/friends/requests")
           if (res.ok) {
             const list = await res.json()
             setIncomingCount(Array.isArray(list) ? list.length : 0)

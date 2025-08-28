@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Check, X, Loader2 } from "lucide-react"
 import { toast } from "sonner"
+import { tokenUtils, apiUtils } from "@/utils/apiUtils"
 
 interface FriendRequestDTO {
   id: string
@@ -20,20 +21,16 @@ export default function IncomingRequests() {
   const [loading, setLoading] = useState(false)
   const [acceptingId, setAcceptingId] = useState<string | null>(null)
   const [rejectingId, setRejectingId] = useState<string | null>(null)
-  const token = localStorage.getItem("jwt_token")
 
   useEffect(() => {
     ;(async () => {
       setLoading(true)
-      if (!token) {
+      if (!tokenUtils.exists()) {
         setLoading(false)
         return
       }
       try {
-        const res = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/api/friends/requests`,
-          { headers: { Authorization: `Bearer ${token}` } },
-        )
+        const res = await apiUtils.get("/api/friends/requests")
         if (res.ok) setRequests(await res.json())
       } catch {
         // ignore
@@ -41,21 +38,18 @@ export default function IncomingRequests() {
         setLoading(false)
       }
     })()
-  }, [token])
+  }, [])
 
   const accept = async (id: string) => {
-    if (!token) return
+    if (!tokenUtils.exists()) return
     setAcceptingId(id)
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/friends/requests/${id}/accept`,
-        { method: "POST", headers: { Authorization: `Bearer ${token}` } },
+      const res = await apiUtils.authenticatedRequest(
+        `/api/friends/requests/${id}/accept`,
+        { method: "POST" },
       )
       if (res.ok) {
-        const r = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/api/friends/requests`,
-          { headers: { Authorization: `Bearer ${token}` } },
-        )
+        const r = await apiUtils.get("/api/friends/requests")
         if (r.ok) setRequests(await r.json())
         try {
           window.dispatchEvent(
@@ -77,18 +71,15 @@ export default function IncomingRequests() {
   }
 
   const reject = async (id: string) => {
-    if (!token) return
+    if (!tokenUtils.exists()) return
     setRejectingId(id)
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/friends/requests/${id}/reject`,
-        { method: "POST", headers: { Authorization: `Bearer ${token}` } },
+      const res = await apiUtils.authenticatedRequest(
+        `/api/friends/requests/${id}/reject`,
+        { method: "POST" },
       )
       if (res.ok) {
-        const r = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/api/friends/requests`,
-          { headers: { Authorization: `Bearer ${token}` } },
-        )
+        const r = await apiUtils.get("/api/friends/requests")
         if (r.ok) setRequests(await r.json())
         try {
           window.dispatchEvent(

@@ -4,6 +4,7 @@ import com.flow.backend.dto.ChatMessageDTO;
 import com.flow.backend.model.User;
 import com.flow.backend.service.ChatService;
 import com.flow.backend.service.UserService;
+import com.flow.backend.util.UserDisplayUtil;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +23,8 @@ public class ChatStompController {
   @Autowired private ChatService chatService;
 
   @Autowired private UserService userService;
+
+  @Autowired private UserDisplayUtil userDisplayUtil;
 
   @MessageMapping("/chats/{friendshipId}/send")
   public void sendMessage(
@@ -69,8 +72,7 @@ public class ChatStompController {
     Map<String, Object> typingEvent = new HashMap<>();
     typingEvent.put("type", "typing");
     typingEvent.put("userId", senderId.toString());
-    typingEvent.put(
-        "userName", sender.getDisplayName() != null ? sender.getDisplayName() : sender.getName());
+    typingEvent.put("userName", userDisplayUtil.getDisplayName(sender));
     typingEvent.put("isTyping", Boolean.valueOf(isTyping));
 
     messagingTemplate.convertAndSend(

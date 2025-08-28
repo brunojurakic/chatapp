@@ -1,10 +1,9 @@
 package com.flow.backend.util;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.flow.backend.model.User;
 import com.flow.backend.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Component
 public class AuthUtil {
