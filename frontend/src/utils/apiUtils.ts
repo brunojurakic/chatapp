@@ -20,9 +20,12 @@ export const apiUtils = {
       throw new Error("No authentication token available")
     }
 
-    const defaultHeaders = {
+    const defaultHeaders: Record<string, string> = {
       Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
+    }
+
+    if (!(options.body instanceof FormData)) {
+      defaultHeaders["Content-Type"] = "application/json"
     }
 
     return fetch(`${API_BASE_URL}${endpoint}`, {

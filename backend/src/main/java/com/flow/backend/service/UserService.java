@@ -1,14 +1,12 @@
 package com.flow.backend.service;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.flow.backend.model.User;
 import com.flow.backend.repository.UserRepository;
 import com.flow.backend.util.UserUtil;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
