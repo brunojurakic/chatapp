@@ -44,10 +44,7 @@ export default function IncomingRequests() {
     if (!tokenUtils.exists()) return
     setAcceptingId(id)
     try {
-      const res = await apiUtils.authenticatedRequest(
-        `/api/friends/requests/${id}/accept`,
-        { method: "POST" },
-      )
+      const res = await apiUtils.post(`/api/friends/requests/${id}/accept`, {})
       if (res.ok) {
         const r = await apiUtils.get("/api/friends/requests")
         if (r.ok) setRequests(await r.json())
@@ -74,10 +71,7 @@ export default function IncomingRequests() {
     if (!tokenUtils.exists()) return
     setRejectingId(id)
     try {
-      const res = await apiUtils.authenticatedRequest(
-        `/api/friends/requests/${id}/reject`,
-        { method: "POST" },
-      )
+      const res = await apiUtils.post(`/api/friends/requests/${id}/reject`, {})
       if (res.ok) {
         const r = await apiUtils.get("/api/friends/requests")
         if (r.ok) setRequests(await r.json())

@@ -42,9 +42,9 @@ export default function SearchAndSend() {
     if (!tokenUtils.exists()) return
     setSendingId(username)
     try {
-      const res = await apiUtils.authenticatedRequest(
+      const res = await apiUtils.post(
         `/api/friends/request?username=${encodeURIComponent(username)}`,
-        { method: "POST" },
+        {},
       )
       if (res.ok) {
         toast.success("Friend request sent")
@@ -77,9 +77,9 @@ export default function SearchAndSend() {
     if (!tokenUtils.exists()) return
     setAcceptingId(requestId)
     try {
-      const res = await apiUtils.authenticatedRequest(
+      const res = await apiUtils.post(
         `/api/friends/requests/${requestId}/accept`,
-        { method: "POST" },
+        {},
       )
       if (res.ok) {
         toast.success("Friend request accepted")

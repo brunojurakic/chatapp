@@ -99,9 +99,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const token = getToken()
       if (token) {
-        await apiUtils.authenticatedRequest("/api/auth/logout", {
-          method: "POST",
-        })
+        await apiUtils.post("/api/auth/logout", {})
       }
     } catch (error) {
       errorUtils.handleApiError("Logout", error)
