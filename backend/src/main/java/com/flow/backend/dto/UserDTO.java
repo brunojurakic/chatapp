@@ -1,5 +1,7 @@
 package com.flow.backend.dto;
 
+import java.util.Set;
+
 public class UserDTO {
   private String name;
   private String email;
@@ -8,6 +10,7 @@ public class UserDTO {
   private String username;
   private String displayName;
   private String themePreference;
+  private Set<String> roles;
 
   public UserDTO() {}
 
@@ -41,7 +44,8 @@ public class UserDTO {
       boolean authenticated,
       String username,
       String displayName,
-      String themePreference) {
+      String themePreference,
+      Set<String> roles) {
     this.name = name;
     this.email = email;
     this.picture = picture;
@@ -49,6 +53,7 @@ public class UserDTO {
     this.username = username;
     this.displayName = displayName;
     this.themePreference = themePreference;
+    this.roles = roles;
   }
 
   // Getters and Setters
@@ -106,5 +111,13 @@ public class UserDTO {
 
   public void setThemePreference(String themePreference) {
     this.themePreference = themePreference;
+  }
+
+  public Set<String> getRoles() {
+    return roles;
+  }
+
+  public void setRoles(Set<String> roles) {
+    this.roles = roles;
   }
 }

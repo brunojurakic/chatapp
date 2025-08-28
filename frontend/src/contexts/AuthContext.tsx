@@ -10,6 +10,7 @@ interface User {
   username?: string | null
   displayName?: string | null
   themePreference?: string
+  roles?: string[]
 }
 
 interface AuthContextType {
@@ -74,6 +75,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           username: userData.username || null,
           displayName: userData.displayName || userData.name,
           themePreference: userData.themePreference || "system",
+          roles: userData.roles || ["REGULAR"],
         })
       } else {
         removeToken()

@@ -2,13 +2,17 @@ package com.flow.backend.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -40,6 +44,9 @@ public class User {
 
   @Column(name = "google_id", unique = true)
   private String googleId;
+
+  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+  private Set<UserRole> userRoles = new HashSet<>();
 
   @Column(name = "created_at", nullable = false)
   private Instant createdAt;
@@ -162,5 +169,13 @@ public class User {
 
   public void setThemePreference(String themePreference) {
     this.themePreference = themePreference;
+  }
+
+  public Set<UserRole> getUserRoles() {
+    return userRoles;
+  }
+
+  public void setUserRoles(Set<UserRole> userRoles) {
+    this.userRoles = userRoles;
   }
 }

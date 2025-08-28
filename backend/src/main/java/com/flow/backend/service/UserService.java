@@ -2,6 +2,7 @@ package com.flow.backend.service;
 
 import com.flow.backend.model.User;
 import com.flow.backend.repository.UserRepository;
+import com.flow.backend.util.UserUtil;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,10 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
   @Autowired private UserRepository userRepository;
+
+  @Autowired private RoleService roleService;
+
+  @Autowired private UserUtil userUtil;
 
   public Optional<User> findByEmail(String email) {
     return userRepository.findByEmail(email);
@@ -49,14 +54,13 @@ public class UserService {
     if (existingUser.isPresent()) {
       User user = existingUser.get();
       user.setName(name);
-      if (user.getProfilePictureUrl() == null
-          || user.getProfilePictureUrl().isEmpty()
-          || user.getProfilePictureUrl().contains("googleusercontent.com")) {
-        user.setProfilePictureUrl(profilePictureUrl);
-      }
+      userUtil.updateProfilePictureIfNeeded(user, profilePictureUrl);
+      roleService.assignRegularRoleIfNone(user);
       return updateUser(user);
     } else {
-      return createUser(email, name, profilePictureUrl, googleId);
+      User newUser = createUser(email, name, profilePictureUrl, googleId);
+      roleService.assignRoleToUser(newUser, "REGULAR");
+      return newUser;
     }
   }
 
@@ -71,5 +75,12 @@ public class UserService {
     user.setUsername(username);
     user.setDisplayName(displayName);
     return updateUser(user);
+  }
+
+  public void migrateExistingUsersToRoles() {
+    List<User> allUsers = userRepository.findAll();
+    for (User user : allUsers) {
+      roleService.assignRegularRoleIfNone(user);
+    }
   }
 }

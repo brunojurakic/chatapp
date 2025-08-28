@@ -7,6 +7,7 @@ import com.flow.backend.model.Friendship;
 import com.flow.backend.model.User;
 import com.flow.backend.repository.FriendRequestRepository;
 import com.flow.backend.repository.FriendshipRepository;
+import com.flow.backend.util.UserDisplayUtil;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -26,6 +27,8 @@ public class FriendService {
 
   @Autowired private UserService userService;
 
+  @Autowired private UserDisplayUtil userDisplayUtil;
+
   public List<FriendRequestDTO> getIncomingRequests(User recipient) {
     List<FriendRequest> reqs =
         friendRequestRepository.findByRecipientAndStatus(recipient, "PENDING");
@@ -35,9 +38,7 @@ public class FriendService {
                 new FriendRequestDTO(
                     r.getId(),
                     r.getRequester().getId(),
-                    r.getRequester().getDisplayName() != null
-                        ? r.getRequester().getDisplayName()
-                        : r.getRequester().getName(),
+                    userDisplayUtil.getDisplayName(r.getRequester()),
                     r.getRequester().getUsername(),
                     r.getRequester().getProfilePictureUrl(),
                     r.getStatus(),
@@ -121,9 +122,7 @@ public class FriendService {
                 new OutgoingRequestDTO(
                     r.getId(),
                     r.getRecipient().getId(),
-                    r.getRecipient().getDisplayName() != null
-                        ? r.getRecipient().getDisplayName()
-                        : r.getRecipient().getName(),
+                    userDisplayUtil.getDisplayName(r.getRecipient()),
                     r.getRecipient().getUsername(),
                     r.getRecipient().getProfilePictureUrl(),
                     r.getStatus(),

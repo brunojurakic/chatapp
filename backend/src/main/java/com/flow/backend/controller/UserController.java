@@ -2,9 +2,10 @@ package com.flow.backend.controller;
 
 import com.flow.backend.dto.UserDTO;
 import com.flow.backend.model.User;
+import com.flow.backend.service.RoleService;
 import com.flow.backend.service.UserService;
 import com.flow.backend.service.VercelBlobService;
-import com.flow.backend.util.JwtUtil;
+import com.flow.backend.util.AuthUtil;
 import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,11 +20,13 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api/user")
 public class UserController {
 
-  @Autowired private JwtUtil jwtUtil;
-
   @Autowired private UserService userService;
 
+  @Autowired private RoleService roleService;
+
   @Autowired private VercelBlobService vercelBlobService;
+
+  @Autowired private AuthUtil authUtil;
 
   @PutMapping("/settings")
   public ResponseEntity<?> updateSettings(
@@ -32,17 +35,8 @@ public class UserController {
       @RequestParam(value = "themePreference", required = false) String themePreference,
       @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture) {
 
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-      return ResponseEntity.status(401).body("Not authenticated");
-    }
-
-    String token = authHeader.substring(7);
     try {
-      if (!jwtUtil.validateToken(token)) {
-        return ResponseEntity.status(401).body("Invalid token");
-      }
-
-      String email = jwtUtil.extractUsername(token);
+      String email = authUtil.extractEmailFromToken(authHeader);
       User currentUser = userService.findByEmail(email).orElse(null);
       if (currentUser == null) {
         return ResponseEntity.status(404).body("User not found");
@@ -80,9 +74,12 @@ public class UserController {
               true,
               updated.getUsername(),
               updated.getDisplayName(),
-              updated.getThemePreference());
+              updated.getThemePreference(),
+              roleService.getUserRoles(updated));
 
       return ResponseEntity.ok(userDTO);
+    } catch (SecurityException e) {
+      return ResponseEntity.status(401).body(e.getMessage());
     } catch (Exception e) {
       return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
     }

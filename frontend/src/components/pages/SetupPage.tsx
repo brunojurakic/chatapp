@@ -16,6 +16,12 @@ const SetupPage: React.FC = () => {
   const [error, setError] = React.useState<string | null>(null)
   const [loading, setLoading] = React.useState(false)
 
+  React.useEffect(() => {
+    if (user && user.username && user.displayName) {
+      navigate("/home", { replace: true })
+    }
+  }, [user, navigate])
+
   const {
     register,
     handleSubmit,
@@ -64,7 +70,12 @@ const SetupPage: React.FC = () => {
         }
         navigate("/home", { replace: true })
       } else if (res.status === 409) {
-        setError("Username already taken")
+        const txt = await res.text()
+        if (txt === "User is already set up") {
+          navigate("/home", { replace: true })
+        } else {
+          setError("Username already taken")
+        }
       } else {
         const txt = await res.text()
         setError(txt || "Failed to set username")
