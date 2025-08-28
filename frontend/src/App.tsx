@@ -8,11 +8,13 @@ import { AuthProvider } from "./contexts/AuthContext"
 import { ThemeProvider } from "./components/theme-provider"
 import { Toaster } from "./components/ui/sonner"
 import ProtectedRoute from "./components/ProtectedRoute"
+import AdminRoute from "./components/AdminRoute"
 import SetupRoute from "./components/SetupRoute"
 import LoginPage from "./components/pages/LoginPage"
 import HomePage from "./components/pages/HomePage"
 import SetupPage from "./components/pages/SetupPage"
 import SettingsPage from "./components/pages/SettingsPage"
+import AdminPage from "./components/pages/AdminPage"
 import AuthCallback from "./components/AuthCallback"
 import FriendsPage from "./components/pages/FriendsPage"
 import ChatPage from "./components/pages/ChatPage"
@@ -47,6 +49,14 @@ const App = () => {
                 <ProtectedRoute>
                   <SettingsPage />
                 </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <AdminPage />
+                </AdminRoute>
               }
             />
             <Route

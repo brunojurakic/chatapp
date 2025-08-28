@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ModeToggle } from "@/components/mode-toggle"
 import { FlowLogo } from "@/components/ui/flow-logo"
-import { LogOut, Settings } from "lucide-react"
+import { LogOut, Settings, Shield } from "lucide-react"
 import { Link } from "react-router-dom"
 import { Users } from "lucide-react"
 
@@ -48,19 +48,36 @@ const Header: React.FC = () => {
           </div>
 
           <div className="flex items-center justify-center flex-1">
-            <Link
-              to="/friends"
-              className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
-            >
-              <Button
-                variant="ghost"
-                size="sm"
-                className="flex items-center space-x-2"
+            <div className="flex items-center space-x-4">
+              <Link
+                to="/friends"
+                className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
               >
-                <Users className="h-4 w-4" />
-                <span className="hidden sm:inline">Friends</span>
-              </Button>
-            </Link>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center space-x-2"
+                >
+                  <Users className="h-4 w-4" />
+                  <span className="hidden sm:inline">Friends</span>
+                </Button>
+              </Link>
+              {user?.roles?.includes("ADMIN") && (
+                <Link
+                  to="/admin"
+                  className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+                >
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex items-center space-x-2"
+                  >
+                    <Shield className="h-4 w-4" />
+                    <span className="hidden sm:inline">Admin</span>
+                  </Button>
+                </Link>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center space-x-4 flex-1 justify-end">
