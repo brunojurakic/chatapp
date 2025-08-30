@@ -257,9 +257,9 @@ const AdminPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">
+      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
             Admin Dashboard
           </h1>
           <p className="text-muted-foreground mt-2">
@@ -274,7 +274,7 @@ const AdminPage = () => {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
@@ -336,12 +336,12 @@ const AdminPage = () => {
                   View and manage user roles and permissions
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-4 sm:p-6">
                 <div className="space-y-4">
                   {users.map((userItem) => (
                     <div
                       key={userItem.id}
-                      className="flex items-center justify-between p-4 border rounded-lg"
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 border rounded-lg gap-3 sm:gap-4"
                     >
                       <div className="flex items-center space-x-4">
                         <Avatar>
@@ -350,30 +350,32 @@ const AdminPage = () => {
                             {getInitials(userItem.displayName || userItem.name)}
                           </AvatarFallback>
                         </Avatar>
-                        <div>
-                          <p className="font-medium">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium truncate">
                             {userItem.displayName || userItem.name}
                           </p>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-sm text-muted-foreground truncate">
                             {userItem.email}
                           </p>
                           {userItem.username && (
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-sm text-muted-foreground truncate">
                               @{userItem.username}
                             </p>
                           )}
                         </div>
                       </div>
 
-                      <div className="flex items-center space-x-4">
+                      <div className="flex items-center gap-2 sm:gap-4">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="min-w-[120px]">
-                              <Settings className="h-4 w-4 mr-2" />
-                              Manage Roles
+                            <Button variant="outline" className="flex-shrink-0">
+                              <Settings className="h-4 w-4" />
+                              <span className="hidden sm:ml-2 sm:inline">
+                                Manage Roles
+                              </span>
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-56">
+                          <DropdownMenuContent className="w-56 max-w-[calc(100vw-2rem)]">
                             <DropdownMenuLabel>
                               Role Management
                             </DropdownMenuLabel>
@@ -422,11 +424,17 @@ const AdminPage = () => {
                             )
                           }
                           disabled={actionLoading === userItem.id}
+                          className="flex-shrink-0"
                         >
                           {actionLoading === userItem.id ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
                           ) : (
-                            <Trash2 className="h-4 w-4" />
+                            <>
+                              <Trash2 className="h-4 w-4" />
+                              <span className="hidden sm:ml-2 sm:inline">
+                                Delete
+                              </span>
+                            </>
                           )}
                         </Button>
                       </div>
