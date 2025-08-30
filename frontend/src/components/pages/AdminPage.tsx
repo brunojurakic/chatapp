@@ -1,34 +1,14 @@
 import { useState, useEffect, useRef } from "react"
 import Header from "../header"
 import { apiUtils, errorUtils } from "@/utils/apiUtils"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu"
-import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
-import { CheckIcon } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import {
-  Loader2,
-  Users,
-  Shield,
-  UserCheck,
-  Settings,
-  Trash2,
-} from "lucide-react"
+import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
+import {
+  SystemStats,
+  UserManagement,
+  DeleteUserModal,
+} from "@/components/admin"
 
 interface User {
   id?: string
@@ -51,43 +31,6 @@ interface SystemStats {
   totalUsers: number
   adminUsers: number
   regularUsers: number
-}
-
-const RoleCheckboxItem = ({
-  checked,
-  onCheckedChange,
-  disabled,
-  loading,
-  children,
-  onSelect,
-}: {
-  checked: boolean
-  onCheckedChange: (checked: boolean) => void
-  disabled?: boolean
-  loading?: boolean
-  children: React.ReactNode
-  onSelect?: (e: Event) => void
-}) => {
-  return (
-    <DropdownMenuPrimitive.CheckboxItem
-      className="focus:bg-accent focus:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
-      checked={checked}
-      onCheckedChange={onCheckedChange}
-      disabled={disabled}
-      onSelect={onSelect}
-    >
-      <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
-        {loading ? (
-          <Loader2 className="size-3 animate-spin" />
-        ) : (
-          <DropdownMenuPrimitive.ItemIndicator>
-            <CheckIcon className="size-4" />
-          </DropdownMenuPrimitive.ItemIndicator>
-        )}
-      </span>
-      {children}
-    </DropdownMenuPrimitive.CheckboxItem>
-  )
 }
 
 const AdminPage = () => {
@@ -213,14 +156,6 @@ const AdminPage = () => {
     openModal(userId)
   }
 
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-  }
-
   const closeModal = () => {
     setModalEntered(false)
     timeoutRef.current = window.setTimeout(() => {
@@ -296,219 +231,31 @@ const AdminPage = () => {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Total Users
-                  </CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {stats?.totalUsers || 0}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Registered users
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Admin Users
-                  </CardTitle>
-                  <Shield className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {stats?.adminUsers || 0}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Users with admin privileges
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Regular Users
-                  </CardTitle>
-                  <UserCheck className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {stats?.regularUsers || 0}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Standard user accounts
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
+            <SystemStats stats={stats} />
           </TabsContent>
 
           <TabsContent value="users" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>User Management</CardTitle>
-                <CardDescription>
-                  View and manage user roles and permissions
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-4 sm:p-6">
-                <div className="space-y-4">
-                  {users.map((userItem) => (
-                    <div
-                      key={userItem.id}
-                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 border rounded-lg gap-3 sm:gap-4"
-                    >
-                      <div className="flex items-center space-x-4">
-                        <Avatar>
-                          <AvatarImage src={userItem.picture} />
-                          <AvatarFallback>
-                            {getInitials(userItem.displayName || userItem.name)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">
-                            {userItem.displayName || userItem.name}
-                          </p>
-                          <p className="text-sm text-muted-foreground truncate">
-                            {userItem.email}
-                          </p>
-                          {userItem.username && (
-                            <p className="text-sm text-muted-foreground truncate">
-                              @{userItem.username}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 sm:gap-4">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="flex-shrink-0">
-                              <Settings className="h-4 w-4" />
-                              <span className="hidden sm:ml-2 sm:inline">
-                                Manage Roles
-                              </span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-56 max-w-[calc(100vw-2rem)]">
-                            <DropdownMenuLabel>
-                              Role Management
-                            </DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            {roles.map((role) => (
-                              <RoleCheckboxItem
-                                key={role.name}
-                                checked={
-                                  userItem.roles?.includes(role.name) || false
-                                }
-                                onCheckedChange={(checked) =>
-                                  toggleRole(userItem.id!, role.name, !checked)
-                                }
-                                onSelect={(e) => e.preventDefault()}
-                                disabled={
-                                  roleActionLoading?.userId === userItem.id &&
-                                  roleActionLoading?.roleName === role.name
-                                }
-                                loading={
-                                  roleActionLoading?.userId === userItem.id &&
-                                  roleActionLoading?.roleName === role.name
-                                }
-                              >
-                                <div className="flex flex-col">
-                                  <span className="font-medium">
-                                    {role.name}
-                                  </span>
-                                  {role.description && (
-                                    <span className="text-xs text-muted-foreground">
-                                      {role.description}
-                                    </span>
-                                  )}
-                                </div>
-                              </RoleCheckboxItem>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => deleteUser(userItem.id!)}
-                          disabled={actionLoading === userItem.id}
-                          className="flex-shrink-0"
-                        >
-                          {actionLoading === userItem.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <>
-                              <Trash2 className="h-4 w-4" />
-                              <span className="hidden sm:ml-2 sm:inline">
-                                Delete
-                              </span>
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <UserManagement
+              users={users}
+              roles={roles}
+              actionLoading={actionLoading}
+              roleActionLoading={roleActionLoading}
+              onToggleRole={toggleRole}
+              onDeleteUser={deleteUser}
+            />
           </TabsContent>
         </Tabs>
       </div>
 
-      {modalMounted && (
-        <div
-          className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 transition-opacity duration-200 ${
-            modalEntered ? "opacity-100" : "opacity-0"
-          }`}
-          onClick={closeModal}
-        >
-          <Card
-            className={`w-96 transition-all duration-200 ease-out ${
-              modalEntered ? "scale-100 opacity-100" : "scale-95 opacity-0"
-            }`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <CardHeader>
-              <CardTitle>Confirm User Deletion</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Are you sure you want to delete user{" "}
-                <span className="font-medium">
-                  {users.find((u) => u.id === confirmUserId)?.displayName ||
-                    users.find((u) => u.id === confirmUserId)?.name}
-                </span>
-                ? This action cannot be undone and will delete all of their
-                related data.
-              </p>
-              <div className="flex justify-end space-x-2 mt-4">
-                <Button variant="outline" onClick={closeModal}>
-                  Cancel
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={confirmDeleteUser}
-                  disabled={actionLoading === confirmUserId}
-                >
-                  {actionLoading === confirmUserId ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  ) : null}
-                  Delete User
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      <DeleteUserModal
+        isOpen={modalMounted}
+        isVisible={modalEntered}
+        userId={confirmUserId}
+        users={users}
+        isDeleting={actionLoading === confirmUserId}
+        onClose={closeModal}
+        onConfirm={confirmDeleteUser}
+      />
     </div>
   )
 }
