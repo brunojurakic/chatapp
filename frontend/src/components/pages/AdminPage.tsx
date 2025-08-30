@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Header from "../header"
 import { apiUtils, errorUtils } from "@/utils/apiUtils"
 import {
@@ -100,6 +100,10 @@ const AdminPage = () => {
     userId: string
     roleName: string
   } | null>(null)
+  const [confirmUserId, setConfirmUserId] = useState<string | null>(null)
+  const [modalMounted, setModalMounted] = useState(false)
+  const [modalEntered, setModalEntered] = useState(false)
+  const timeoutRef = useRef<number | null>(null)
 
   useEffect(() => {
     fetchUsers()
@@ -205,19 +209,44 @@ const AdminPage = () => {
     }
   }
 
-  const deleteUser = async (userId: string, userName: string) => {
-    if (
-      !confirm(
-        `Are you sure you want to delete user "${userName}"? This action cannot be undone and will delete all of their data including messages, friendships, and roles.`,
-      )
-    ) {
-      return
-    }
+  const deleteUser = (userId: string) => {
+    openModal(userId)
+  }
 
-    setActionLoading(userId)
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+  }
+
+  const closeModal = () => {
+    setModalEntered(false)
+    timeoutRef.current = window.setTimeout(() => {
+      setModalMounted(false)
+      setConfirmUserId(null)
+    }, 200)
+  }
+
+  const openModal = (userId: string) => {
+    setConfirmUserId(userId)
+    setModalMounted(true)
+    setModalEntered(false)
+    requestAnimationFrame(() => {
+      setModalEntered(true)
+    })
+  }
+
+  const confirmDeleteUser = async () => {
+    if (!confirmUserId) return
+    const userToDelete = users.find((u) => u.id === confirmUserId)
+    if (!userToDelete) return
+
+    setActionLoading(confirmUserId)
     try {
       const response = await apiUtils.authenticatedRequest(
-        `/api/admin/users/${userId}`,
+        `/api/admin/users/${confirmUserId}`,
         { method: "DELETE" },
       )
       if (response.ok) {
@@ -232,15 +261,8 @@ const AdminPage = () => {
       errorUtils.handleApiError("Delete user", error)
     } finally {
       setActionLoading(null)
+      closeModal()
     }
-  }
-
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
   }
 
   if (loading) {
@@ -417,12 +439,7 @@ const AdminPage = () => {
                         <Button
                           variant="destructive"
                           size="sm"
-                          onClick={() =>
-                            deleteUser(
-                              userItem.id!,
-                              userItem.displayName || userItem.name,
-                            )
-                          }
+                          onClick={() => deleteUser(userItem.id!)}
                           disabled={actionLoading === userItem.id}
                           className="flex-shrink-0"
                         >
@@ -446,6 +463,52 @@ const AdminPage = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {modalMounted && (
+        <div
+          className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 transition-opacity duration-200 ${
+            modalEntered ? "opacity-100" : "opacity-0"
+          }`}
+          onClick={closeModal}
+        >
+          <Card
+            className={`w-96 transition-all duration-200 ease-out ${
+              modalEntered ? "scale-100 opacity-100" : "scale-95 opacity-0"
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <CardHeader>
+              <CardTitle>Confirm User Deletion</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Are you sure you want to delete user{" "}
+                <span className="font-medium">
+                  {users.find((u) => u.id === confirmUserId)?.displayName ||
+                    users.find((u) => u.id === confirmUserId)?.name}
+                </span>
+                ? This action cannot be undone and will delete all of their
+                related data.
+              </p>
+              <div className="flex justify-end space-x-2 mt-4">
+                <Button variant="outline" onClick={closeModal}>
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={confirmDeleteUser}
+                  disabled={actionLoading === confirmUserId}
+                >
+                  {actionLoading === confirmUserId ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : null}
+                  Delete User
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   )
 }
