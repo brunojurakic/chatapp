@@ -43,7 +43,13 @@ public class SecurityConfig {
             authz ->
                 authz
                     .requestMatchers(
-                        "/", "/ws", "/ws/**", "/api/auth/**", "/oauth2/**", "/api/public/**")
+                        "/",
+                        "/ws",
+                        "/ws/**",
+                        "/api/auth/**",
+                        "/oauth2/**",
+                        "/api/public/**",
+                        "/api/admin/**")
                     .permitAll()
                     .requestMatchers(HttpMethod.OPTIONS, "/**")
                     .permitAll()
