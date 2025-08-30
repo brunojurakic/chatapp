@@ -20,7 +20,14 @@ import {
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
 import { CheckIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Loader2, Users, Shield, UserCheck, Settings } from "lucide-react"
+import {
+  Loader2,
+  Users,
+  Shield,
+  UserCheck,
+  Settings,
+  Trash2,
+} from "lucide-react"
 import { toast } from "sonner"
 
 interface User {
@@ -88,6 +95,7 @@ const AdminPage = () => {
   const [roles, setRoles] = useState<Role[]>([])
   const [stats, setStats] = useState<SystemStats | null>(null)
   const [loading, setLoading] = useState(true)
+  const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [roleActionLoading, setRoleActionLoading] = useState<{
     userId: string
     roleName: string
@@ -194,6 +202,36 @@ const AdminPage = () => {
       await removeRole(userId, roleName)
     } else {
       await assignRole(userId, roleName)
+    }
+  }
+
+  const deleteUser = async (userId: string, userName: string) => {
+    if (
+      !confirm(
+        `Are you sure you want to delete user "${userName}"? This action cannot be undone and will delete all of their data including messages, friendships, and roles.`,
+      )
+    ) {
+      return
+    }
+
+    setActionLoading(userId)
+    try {
+      const response = await apiUtils.authenticatedRequest(
+        `/api/admin/users/${userId}`,
+        { method: "DELETE" },
+      )
+      if (response.ok) {
+        toast.success("User deleted successfully")
+        fetchUsers()
+        fetchStats()
+      } else {
+        const error = await response.text()
+        toast.error(error || "Failed to delete user")
+      }
+    } catch (error) {
+      errorUtils.handleApiError("Delete user", error)
+    } finally {
+      setActionLoading(null)
     }
   }
 
@@ -373,6 +411,24 @@ const AdminPage = () => {
                             ))}
                           </DropdownMenuContent>
                         </DropdownMenu>
+
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() =>
+                            deleteUser(
+                              userItem.id!,
+                              userItem.displayName || userItem.name,
+                            )
+                          }
+                          disabled={actionLoading === userItem.id}
+                        >
+                          {actionLoading === userItem.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
+                        </Button>
                       </div>
                     </div>
                   ))}

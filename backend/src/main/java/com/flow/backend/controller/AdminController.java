@@ -199,4 +199,38 @@ public class AdminController {
       return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
     }
   }
+
+  @DeleteMapping("/users/{userId}")
+  public ResponseEntity<?> deleteUser(
+      @RequestHeader(value = "Authorization", required = false) String authHeader,
+      @PathVariable String userId) {
+    try {
+      String email = authUtil.extractEmailFromToken(authHeader);
+      User currentUser = userService.findByEmail(email).orElse(null);
+      if (currentUser == null) {
+        return ResponseEntity.status(404).body("User not found");
+      }
+
+      if (!roleService.getUserRoles(currentUser).contains("ADMIN")) {
+        return ResponseEntity.status(403).body("Access denied. Admin role required.");
+      }
+
+      User targetUser = userService.findById(java.util.UUID.fromString(userId)).orElse(null);
+      if (targetUser == null) {
+        return ResponseEntity.status(404).body("Target user not found");
+      }
+
+      if (currentUser.getId().equals(targetUser.getId())) {
+        return ResponseEntity.status(400).body("Cannot delete your own account");
+      }
+
+      userService.deleteUser(targetUser);
+
+      return ResponseEntity.ok(Map.of("message", "User deleted successfully"));
+    } catch (SecurityException e) {
+      return ResponseEntity.status(401).body(e.getMessage());
+    } catch (Exception e) {
+      return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
+    }
+  }
 }

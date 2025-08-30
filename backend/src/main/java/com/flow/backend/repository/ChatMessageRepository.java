@@ -2,6 +2,7 @@ package com.flow.backend.repository;
 
 import com.flow.backend.model.ChatMessage;
 import com.flow.backend.model.Friendship;
+import com.flow.backend.model.User;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Pageable;
@@ -26,4 +27,9 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, UUID> 
   @Transactional
   @Query("delete from ChatMessage m where m.friendship.id = :friendshipId")
   void deleteByFriendshipId(@Param("friendshipId") UUID friendshipId);
+
+  @Modifying
+  @Transactional
+  @Query("delete from ChatMessage m where m.sender = :user")
+  void deleteByUser(@Param("user") User user);
 }

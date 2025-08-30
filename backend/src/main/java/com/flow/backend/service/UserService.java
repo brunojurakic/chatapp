@@ -1,12 +1,17 @@
 package com.flow.backend.service;
 
 import com.flow.backend.model.User;
+import com.flow.backend.repository.ChatMessageRepository;
+import com.flow.backend.repository.FriendRequestRepository;
+import com.flow.backend.repository.FriendshipRepository;
 import com.flow.backend.repository.UserRepository;
+import com.flow.backend.repository.UserRoleRepository;
 import com.flow.backend.util.UserUtil;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService {
@@ -16,6 +21,14 @@ public class UserService {
   @Autowired private RoleService roleService;
 
   @Autowired private UserUtil userUtil;
+
+  @Autowired private ChatMessageRepository chatMessageRepository;
+
+  @Autowired private FriendRequestRepository friendRequestRepository;
+
+  @Autowired private FriendshipRepository friendshipRepository;
+
+  @Autowired private UserRoleRepository userRoleRepository;
 
   public Optional<User> findByEmail(String email) {
     return userRepository.findByEmail(email);
@@ -86,5 +99,18 @@ public class UserService {
     for (User user : allUsers) {
       roleService.assignRegularRoleIfNone(user);
     }
+  }
+
+  @Transactional
+  public void deleteUser(User user) {
+    chatMessageRepository.deleteByUser(user);
+
+    friendRequestRepository.deleteByFromUserOrToUser(user, user);
+
+    friendshipRepository.deleteByUser1OrUser2(user);
+
+    userRoleRepository.deleteByUser(user);
+
+    userRepository.delete(user);
   }
 }
