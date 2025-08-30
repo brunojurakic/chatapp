@@ -39,6 +39,7 @@ public class AuthController {
 
       UserDTO userDTO =
           new UserDTO(
+              user != null ? user.getId().toString() : null,
               user != null && user.getDisplayName() != null ? user.getDisplayName() : claims.name,
               claims.email,
               userPicture,

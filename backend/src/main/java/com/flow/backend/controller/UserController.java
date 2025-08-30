@@ -68,6 +68,7 @@ public class UserController {
 
       UserDTO userDTO =
           new UserDTO(
+              updated.getId().toString(),
               updated.getDisplayName(),
               updated.getEmail(),
               updated.getProfilePictureUrl(),

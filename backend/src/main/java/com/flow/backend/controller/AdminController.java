@@ -1,6 +1,7 @@
 package com.flow.backend.controller;
 
 import com.flow.backend.dto.UserDTO;
+import com.flow.backend.model.Role;
 import com.flow.backend.model.User;
 import com.flow.backend.service.RoleService;
 import com.flow.backend.service.UserService;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,6 +50,7 @@ public class AdminController {
               .map(
                   user ->
                       new UserDTO(
+                          user.getId().toString(),
                           user.getDisplayName(),
                           user.getEmail(),
                           user.getProfilePictureUrl(),
@@ -125,6 +128,71 @@ public class AdminController {
               "regularUsers", totalUsers - adminUsers);
 
       return ResponseEntity.ok(stats);
+    } catch (SecurityException e) {
+      return ResponseEntity.status(401).body(e.getMessage());
+    } catch (Exception e) {
+      return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
+    }
+  }
+
+  @GetMapping("/roles")
+  public ResponseEntity<?> getAllRoles(
+      @RequestHeader(value = "Authorization", required = false) String authHeader) {
+    try {
+      String email = authUtil.extractEmailFromToken(authHeader);
+      User currentUser = userService.findByEmail(email).orElse(null);
+      if (currentUser == null) {
+        return ResponseEntity.status(404).body("User not found");
+      }
+
+      if (!roleService.getUserRoles(currentUser).contains("ADMIN")) {
+        return ResponseEntity.status(403).body("Access denied. Admin role required.");
+      }
+
+      List<Role> roles = roleService.getAllRoles();
+      List<Map<String, String>> roleList =
+          roles.stream()
+              .map(
+                  role ->
+                      Map.of(
+                          "name",
+                          role.getName(),
+                          "description",
+                          role.getDescription() != null ? role.getDescription() : ""))
+              .collect(Collectors.toList());
+
+      return ResponseEntity.ok(roleList);
+    } catch (SecurityException e) {
+      return ResponseEntity.status(401).body(e.getMessage());
+    } catch (Exception e) {
+      return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
+    }
+  }
+
+  @DeleteMapping("/users/{userId}/roles")
+  public ResponseEntity<?> removeRoleFromUser(
+      @RequestHeader(value = "Authorization", required = false) String authHeader,
+      @PathVariable String userId,
+      @RequestParam String roleName) {
+    try {
+      String email = authUtil.extractEmailFromToken(authHeader);
+      User currentUser = userService.findByEmail(email).orElse(null);
+      if (currentUser == null) {
+        return ResponseEntity.status(404).body("User not found");
+      }
+
+      if (!roleService.getUserRoles(currentUser).contains("ADMIN")) {
+        return ResponseEntity.status(403).body("Access denied. Admin role required.");
+      }
+
+      User targetUser = userService.findById(java.util.UUID.fromString(userId)).orElse(null);
+      if (targetUser == null) {
+        return ResponseEntity.status(404).body("Target user not found");
+      }
+
+      roleService.removeRoleFromUser(targetUser, roleName);
+
+      return ResponseEntity.ok(Map.of("message", "Role removed successfully"));
     } catch (SecurityException e) {
       return ResponseEntity.status(401).body(e.getMessage());
     } catch (Exception e) {

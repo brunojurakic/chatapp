@@ -3,6 +3,7 @@ package com.flow.backend.dto;
 import java.util.Set;
 
 public class UserDTO {
+  private String id;
   private String name;
   private String email;
   private String picture;
@@ -38,6 +39,7 @@ public class UserDTO {
   }
 
   public UserDTO(
+      String id,
       String name,
       String email,
       String picture,
@@ -46,6 +48,7 @@ public class UserDTO {
       String displayName,
       String themePreference,
       Set<String> roles) {
+    this.id = id;
     this.name = name;
     this.email = email;
     this.picture = picture;
@@ -57,6 +60,14 @@ public class UserDTO {
   }
 
   // Getters and Setters
+  public String getId() {
+    return id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
+  }
+
   public String getName() {
     return name;
   }

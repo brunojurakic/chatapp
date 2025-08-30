@@ -61,6 +61,15 @@ public class RoleService {
         .collect(Collectors.toSet());
   }
 
+  public List<Role> getAllRoles() {
+    return roleRepository.findAll();
+  }
+
+  @Transactional
+  public void removeRoleFromUser(User user, String roleName) {
+    userRoleRepository.deleteByUserAndRole_Name(user, roleName);
+  }
+
   private String getRoleDescription(String roleName) {
     return switch (roleName.toUpperCase()) {
       case "ADMIN" -> "Administrator with full system access";

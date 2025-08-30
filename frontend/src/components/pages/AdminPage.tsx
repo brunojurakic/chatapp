@@ -8,17 +8,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { Loader2, Users, Shield, UserCheck } from "lucide-react"
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu"
+import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
+import { CheckIcon } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Loader2, Users, Shield, UserCheck, Settings } from "lucide-react"
 import { toast } from "sonner"
 
 interface User {
@@ -33,20 +35,67 @@ interface User {
   roles?: string[]
 }
 
+interface Role {
+  name: string
+  description: string
+}
+
 interface SystemStats {
   totalUsers: number
   adminUsers: number
   regularUsers: number
 }
 
+const RoleCheckboxItem = ({
+  checked,
+  onCheckedChange,
+  disabled,
+  loading,
+  children,
+  onSelect,
+}: {
+  checked: boolean
+  onCheckedChange: (checked: boolean) => void
+  disabled?: boolean
+  loading?: boolean
+  children: React.ReactNode
+  onSelect?: (e: Event) => void
+}) => {
+  return (
+    <DropdownMenuPrimitive.CheckboxItem
+      className="focus:bg-accent focus:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+      checked={checked}
+      onCheckedChange={onCheckedChange}
+      disabled={disabled}
+      onSelect={onSelect}
+    >
+      <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+        {loading ? (
+          <Loader2 className="size-3 animate-spin" />
+        ) : (
+          <DropdownMenuPrimitive.ItemIndicator>
+            <CheckIcon className="size-4" />
+          </DropdownMenuPrimitive.ItemIndicator>
+        )}
+      </span>
+      {children}
+    </DropdownMenuPrimitive.CheckboxItem>
+  )
+}
+
 const AdminPage = () => {
   const [users, setUsers] = useState<User[]>([])
+  const [roles, setRoles] = useState<Role[]>([])
   const [stats, setStats] = useState<SystemStats | null>(null)
   const [loading, setLoading] = useState(true)
-  const [actionLoading, setActionLoading] = useState<string | null>(null)
+  const [roleActionLoading, setRoleActionLoading] = useState<{
+    userId: string
+    roleName: string
+  } | null>(null)
 
   useEffect(() => {
     fetchUsers()
+    fetchRoles()
     fetchStats()
   }, [])
 
@@ -61,6 +110,20 @@ const AdminPage = () => {
       }
     } catch (error) {
       errorUtils.handleApiError("Fetch users", error)
+    }
+  }
+
+  const fetchRoles = async () => {
+    try {
+      const response = await apiUtils.authenticatedRequest("/api/admin/roles")
+      if (response.ok) {
+        const roleData = await response.json()
+        setRoles(roleData)
+      } else {
+        toast.error("Failed to fetch roles")
+      }
+    } catch (error) {
+      errorUtils.handleApiError("Fetch roles", error)
     }
   }
 
@@ -81,7 +144,7 @@ const AdminPage = () => {
   }
 
   const assignRole = async (userId: string, roleName: string) => {
-    setActionLoading(userId)
+    setRoleActionLoading({ userId, roleName })
     try {
       const response = await apiUtils.authenticatedRequest(
         `/api/admin/users/${userId}/roles?roleName=${roleName}`,
@@ -97,13 +160,41 @@ const AdminPage = () => {
     } catch (error) {
       errorUtils.handleApiError("Assign role", error)
     } finally {
-      setActionLoading(null)
+      setRoleActionLoading(null)
     }
   }
 
-  const getRoleBadgeVariant = (roles: string[]) => {
-    if (roles.includes("ADMIN")) return "destructive"
-    return "secondary"
+  const removeRole = async (userId: string, roleName: string) => {
+    setRoleActionLoading({ userId, roleName })
+    try {
+      const response = await apiUtils.authenticatedRequest(
+        `/api/admin/users/${userId}/roles?roleName=${roleName}`,
+        { method: "DELETE" },
+      )
+      if (response.ok) {
+        toast.success("Role removed successfully")
+        fetchUsers()
+      } else {
+        const error = await response.text()
+        toast.error(error || "Failed to remove role")
+      }
+    } catch (error) {
+      errorUtils.handleApiError("Remove role", error)
+    } finally {
+      setRoleActionLoading(null)
+    }
+  }
+
+  const toggleRole = async (
+    userId: string,
+    roleName: string,
+    hasRole: boolean,
+  ) => {
+    if (hasRole) {
+      await removeRole(userId, roleName)
+    } else {
+      await assignRole(userId, roleName)
+    }
   }
 
   const getInitials = (name: string) => {
@@ -237,35 +328,51 @@ const AdminPage = () => {
                       </div>
 
                       <div className="flex items-center space-x-4">
-                        <div className="flex flex-wrap gap-2">
-                          {userItem.roles?.map((role) => (
-                            <Badge
-                              key={role}
-                              variant={getRoleBadgeVariant([role])}
-                            >
-                              {role}
-                            </Badge>
-                          ))}
-                        </div>
-
-                        <Select
-                          onValueChange={(value) =>
-                            assignRole(userItem.id!, value)
-                          }
-                          disabled={actionLoading === userItem.id}
-                        >
-                          <SelectTrigger className="w-32">
-                            <SelectValue placeholder="Assign role" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="ADMIN">Admin</SelectItem>
-                            <SelectItem value="REGULAR">Regular</SelectItem>
-                          </SelectContent>
-                        </Select>
-
-                        {actionLoading === userItem.id && (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        )}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="min-w-[120px]">
+                              <Settings className="h-4 w-4 mr-2" />
+                              Manage Roles
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-56">
+                            <DropdownMenuLabel>
+                              Role Management
+                            </DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            {roles.map((role) => (
+                              <RoleCheckboxItem
+                                key={role.name}
+                                checked={
+                                  userItem.roles?.includes(role.name) || false
+                                }
+                                onCheckedChange={(checked) =>
+                                  toggleRole(userItem.id!, role.name, !checked)
+                                }
+                                onSelect={(e) => e.preventDefault()}
+                                disabled={
+                                  roleActionLoading?.userId === userItem.id &&
+                                  roleActionLoading?.roleName === role.name
+                                }
+                                loading={
+                                  roleActionLoading?.userId === userItem.id &&
+                                  roleActionLoading?.roleName === role.name
+                                }
+                              >
+                                <div className="flex flex-col">
+                                  <span className="font-medium">
+                                    {role.name}
+                                  </span>
+                                  {role.description && (
+                                    <span className="text-xs text-muted-foreground">
+                                      {role.description}
+                                    </span>
+                                  )}
+                                </div>
+                              </RoleCheckboxItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
                   ))}
