@@ -4,6 +4,7 @@ import { apiUtils, errorUtils } from "@/utils/apiUtils"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
+import { useAuth } from "@/hooks/use-auth"
 import {
   SystemStats,
   UserManagement,
@@ -34,6 +35,7 @@ interface SystemStats {
 }
 
 const AdminPage = () => {
+  const { user: currentUser } = useAuth()
   const [users, setUsers] = useState<User[]>([])
   const [roles, setRoles] = useState<Role[]>([])
   const [stats, setStats] = useState<SystemStats | null>(null)
@@ -240,6 +242,7 @@ const AdminPage = () => {
               roles={roles}
               actionLoading={actionLoading}
               roleActionLoading={roleActionLoading}
+              currentUser={currentUser}
               onToggleRole={toggleRole}
               onDeleteUser={deleteUser}
             />

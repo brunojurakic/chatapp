@@ -27,6 +27,7 @@ interface UserManagementProps {
   roles: Role[]
   actionLoading: string | null
   roleActionLoading: { userId: string; roleName: string } | null
+  currentUser: User | null
   onToggleRole: (userId: string, roleName: string, hasRole: boolean) => void
   onDeleteUser: (userId: string) => void
 }
@@ -36,6 +37,7 @@ export const UserManagement = ({
   roles,
   actionLoading,
   roleActionLoading,
+  currentUser,
   onToggleRole,
   onDeleteUser,
 }: UserManagementProps) => {
@@ -56,6 +58,7 @@ export const UserManagement = ({
               roles={roles}
               actionLoading={actionLoading}
               roleActionLoading={roleActionLoading}
+              currentUser={currentUser}
               onToggleRole={onToggleRole}
               onDeleteUser={onDeleteUser}
             />

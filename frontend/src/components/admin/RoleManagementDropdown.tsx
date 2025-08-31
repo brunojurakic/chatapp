@@ -23,6 +23,7 @@ interface RoleManagementDropdownProps {
   user: User
   roles: Role[]
   roleActionLoading: { userId: string; roleName: string } | null
+  currentUser: User | null
   onToggleRole: (userId: string, roleName: string, hasRole: boolean) => void
 }
 
@@ -30,6 +31,7 @@ export const RoleManagementDropdown = ({
   user,
   roles,
   roleActionLoading,
+  currentUser,
   onToggleRole,
 }: RoleManagementDropdownProps) => {
   return (
@@ -43,33 +45,46 @@ export const RoleManagementDropdown = ({
       <DropdownMenuContent className="w-56 max-w-[calc(100vw-2rem)]">
         <DropdownMenuLabel className="text-emerald-600 dark:text-emerald-500">Role Management</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {roles.map((role) => (
-          <RoleCheckboxItem
-            key={role.name}
-            checked={user.roles?.includes(role.name) || false}
-            onCheckedChange={(checked) =>
-              onToggleRole(user.id!, role.name, !checked)
-            }
-            onSelect={(e) => e.preventDefault()}
-            disabled={
-              roleActionLoading?.userId === user.id &&
-              roleActionLoading?.roleName === role.name
-            }
-            loading={
-              roleActionLoading?.userId === user.id &&
-              roleActionLoading?.roleName === role.name
-            }
-          >
-            <div className="flex flex-col">
-              <span className="font-medium">{role.name}</span>
-              {role.description && (
-                <span className="text-xs text-muted-foreground">
-                  {role.description}
-                </span>
-              )}
-            </div>
-          </RoleCheckboxItem>
-        ))}
+        {roles.map((role) => {
+          const isCurrentUserAdmin = currentUser?.roles?.includes("ADMIN") || false
+          const isEditingOwnProfile = currentUser?.id === user.id
+          const isAdminRole = role.name === "ADMIN"
+          const shouldDisableAdminRole = isCurrentUserAdmin && isEditingOwnProfile && isAdminRole
+
+          return (
+            <RoleCheckboxItem
+              key={role.name}
+              checked={user.roles?.includes(role.name) || false}
+              onCheckedChange={(checked) =>
+                onToggleRole(user.id!, role.name, !checked)
+              }
+              onSelect={(e) => e.preventDefault()}
+              disabled={
+                (roleActionLoading?.userId === user.id &&
+                  roleActionLoading?.roleName === role.name) ||
+                shouldDisableAdminRole
+              }
+              loading={
+                roleActionLoading?.userId === user.id &&
+                roleActionLoading?.roleName === role.name
+              }
+            >
+              <div className="flex flex-col">
+                <span className="font-medium">{role.name}</span>
+                {role.description && (
+                  <span className="text-xs text-muted-foreground">
+                    {role.description}
+                  </span>
+                )}
+                {shouldDisableAdminRole && (
+                  <span className="text-xs text-amber-600 dark:text-amber-500">
+                    Cannot remove your own admin role
+                  </span>
+                )}
+              </div>
+            </RoleCheckboxItem>
+          )
+        })}
       </DropdownMenuContent>
     </DropdownMenu>
   )
