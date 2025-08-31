@@ -43,13 +43,17 @@ export const RoleManagementDropdown = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56 max-w-[calc(100vw-2rem)]">
-        <DropdownMenuLabel className="text-emerald-600 dark:text-emerald-500">Role Management</DropdownMenuLabel>
+        <DropdownMenuLabel className="text-emerald-600 dark:text-emerald-500">
+          Role Management
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {roles.map((role) => {
-          const isCurrentUserAdmin = currentUser?.roles?.includes("ADMIN") || false
+          const isCurrentUserAdmin =
+            currentUser?.roles?.includes("ADMIN") || false
           const isEditingOwnProfile = currentUser?.id === user.id
           const isAdminRole = role.name === "ADMIN"
-          const shouldDisableAdminRole = isCurrentUserAdmin && isEditingOwnProfile && isAdminRole
+          const shouldDisableAdminRole =
+            isCurrentUserAdmin && isEditingOwnProfile && isAdminRole
 
           return (
             <RoleCheckboxItem
