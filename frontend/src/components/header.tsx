@@ -39,7 +39,7 @@ const Header: React.FC = () => {
     <nav className="border-b w-full">
       <div className="w-full px-6">
         <div className="flex items-center h-16 w-full">
-          <div className="flex-1 md:flex-none">
+          <div className="flex-1 md:flex-none flex items-center">
             <Link
               to="/home"
               className="flex items-center space-x-3 hover:opacity-80 transition-opacity w-fit"
@@ -89,7 +89,7 @@ const Header: React.FC = () => {
             </div>
           </div>
 
-          <div className="hidden md:flex items-center space-x-4 flex-1 justify-end">
+          <div className="hidden md:flex items-center space-x-4 justify-end">
             <ModeToggle />
 
             <DropdownMenu>
