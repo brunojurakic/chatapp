@@ -216,7 +216,7 @@ const AdminPage = () => {
       <Header />
       <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold text-emerald-600 dark:text-emerald-500">
             Admin Dashboard
           </h1>
           <p className="text-muted-foreground mt-2">

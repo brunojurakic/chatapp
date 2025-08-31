@@ -28,10 +28,10 @@ export const RoleCheckboxItem = ({
     >
       <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
         {loading ? (
-          <Loader2 className="size-3 animate-spin" />
+          <Loader2 className="size-3 animate-spin text-emerald-600 dark:text-emerald-500" />
         ) : (
           <DropdownMenuPrimitive.ItemIndicator>
-            <CheckIcon className="size-4" />
+            <CheckIcon className="size-4 text-emerald-600 dark:text-emerald-500" />
           </DropdownMenuPrimitive.ItemIndicator>
         )}
       </span>

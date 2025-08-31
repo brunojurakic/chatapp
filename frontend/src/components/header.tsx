@@ -43,7 +43,7 @@ const Header: React.FC = () => {
                   size={20}
                 />
               </div>
-              <h1 className="text-xl font-bold">Flow</h1>
+              <h1 className="text-xl font-bold text-emerald-600 dark:text-emerald-500">Flow</h1>
             </Link>
           </div>
 

@@ -35,13 +35,13 @@ export const RoleManagementDropdown = ({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="flex-shrink-0">
+        <Button variant="accent" size="sm" className="flex-shrink-0">
           <Settings className="h-4 w-4" />
           <span className="hidden sm:ml-2 sm:inline">Manage Roles</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56 max-w-[calc(100vw-2rem)]">
-        <DropdownMenuLabel>Role Management</DropdownMenuLabel>
+        <DropdownMenuLabel className="text-emerald-600 dark:text-emerald-500">Role Management</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {roles.map((role) => (
           <RoleCheckboxItem

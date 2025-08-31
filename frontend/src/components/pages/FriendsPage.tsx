@@ -95,7 +95,7 @@ export default function FriendsPage() {
     <div className="min-h-screen bg-background">
       <Header />
       <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <h2 className="text-2xl font-bold mb-4">Friends</h2>
+        <h2 className="text-2xl font-bold mb-4 text-emerald-600 dark:text-emerald-500">Friends</h2>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="space-x-3">
             <TabsTrigger value="friends">Friends</TabsTrigger>

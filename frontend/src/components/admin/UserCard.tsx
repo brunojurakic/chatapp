@@ -74,7 +74,7 @@ export const UserCard = ({
         />
 
         <Button
-          variant="destructive"
+          variant="default"
           size="sm"
           onClick={() => onDeleteUser(user.id!)}
           disabled={actionLoading === user.id}
@@ -84,8 +84,8 @@ export const UserCard = ({
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
             <>
-              <Trash2 className="h-4 w-4" />
-              <span className="hidden sm:ml-2 sm:inline">Delete</span>
+              <Trash2 className="h-4 w-4 text-red-500 dark:text-red-800" />
+              <span className="hidden sm:ml-2 sm:inline text-red-500 dark:text-red-800">Delete</span>
             </>
           )}
         </Button>
