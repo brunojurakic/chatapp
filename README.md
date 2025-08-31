@@ -19,10 +19,14 @@ A full‑stack chat application under active development. Current features inclu
   - SockJS + @stomp/stompjs client on the frontend
   - Messages persisted in database
 - Account settings management
+  - Profile picture upload and management
+  - Display name customization
+  - Theme preference settings
 - File & image attachments in chat
   - Upload and send files and images in conversations
   - Image previews
   - Downloadable file attachments
+  - Upload progress indicators
 
 - Real-time typing indicators
   - Clients show when the other user is typing using STOMP events
@@ -31,10 +35,24 @@ A full‑stack chat application under active development. Current features inclu
   - Light/dark theme support
   - User theme is synced across devices/accounts
 
-- Filtering messages by their contents
+- Message search and filtering
+  - Search messages within conversations
+  - Navigate between search results
+  - Highlight matching text in messages
 
 - Onboarding / setup flow and protected routes
   - Setup page for first-time users and protected routes that require authentication
+  - Username and display name setup
+
+- Admin dashboard (admin users only)
+  - User management (view all users, delete users)
+  - Role-based access control (assign/remove roles)
+
+- Mobile-responsive design
+
+- Connection management
+  - Real-time connection status indicators
+  - Automatic WebSocket reconnection
 
 ## Architecture & Technologies
 
