@@ -6,6 +6,8 @@ import com.flow.backend.model.User;
 import com.flow.backend.service.RoleService;
 import com.flow.backend.service.UserService;
 import com.flow.backend.util.AuthUtil;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,6 +31,8 @@ public class AdminController {
   @Autowired private RoleService roleService;
 
   @Autowired private AuthUtil authUtil;
+
+  @Autowired private com.flow.backend.repository.ChatMessageRepository chatMessageRepository;
 
   @GetMapping("/users")
   public ResponseEntity<?> getAllUsers(
@@ -120,12 +124,14 @@ public class AdminController {
           allUsers.stream()
               .filter(user -> roleService.getUserRoles(user).contains("ADMIN"))
               .count();
+      long totalMessages = chatMessageRepository.count();
 
       Map<String, Object> stats =
           Map.of(
               "totalUsers", totalUsers,
               "adminUsers", adminUsers,
-              "regularUsers", totalUsers - adminUsers);
+              "regularUsers", totalUsers - adminUsers,
+              "totalMessages", totalMessages);
 
       return ResponseEntity.ok(stats);
     } catch (SecurityException e) {
@@ -200,10 +206,10 @@ public class AdminController {
     }
   }
 
-  @DeleteMapping("/users/{userId}")
-  public ResponseEntity<?> deleteUser(
+  @GetMapping("/message-stats")
+  public ResponseEntity<?> getMessageStats(
       @RequestHeader(value = "Authorization", required = false) String authHeader,
-      @PathVariable String userId) {
+      @RequestParam(defaultValue = "30") int days) {
     try {
       String email = authUtil.extractEmailFromToken(authHeader);
       User currentUser = userService.findByEmail(email).orElse(null);
@@ -215,18 +221,33 @@ public class AdminController {
         return ResponseEntity.status(403).body("Access denied. Admin role required.");
       }
 
-      User targetUser = userService.findById(java.util.UUID.fromString(userId)).orElse(null);
-      if (targetUser == null) {
-        return ResponseEntity.status(404).body("Target user not found");
-      }
+      LocalDate endDate = LocalDate.now();
+      LocalDate startDate = endDate.minusDays(days);
 
-      if (currentUser.getId().equals(targetUser.getId())) {
-        return ResponseEntity.status(400).body("Cannot delete your own account");
-      }
+      List<Map<String, Object>> messageStats =
+          chatMessageRepository.findAll().stream()
+              .filter(
+                  msg -> {
+                    LocalDate msgDate = msg.getCreatedAt().atZone(ZoneOffset.UTC).toLocalDate();
+                    return !msgDate.isBefore(startDate) && !msgDate.isAfter(endDate);
+                  })
+              .collect(
+                  Collectors.groupingBy(
+                      msg -> msg.getCreatedAt().atZone(ZoneOffset.UTC).toLocalDate().toString(),
+                      Collectors.counting()))
+              .entrySet()
+              .stream()
+              .map(
+                  entry -> {
+                    Map<String, Object> map = new java.util.HashMap<>();
+                    map.put("date", entry.getKey());
+                    map.put("count", entry.getValue());
+                    return map;
+                  })
+              .sorted((a, b) -> ((String) a.get("date")).compareTo((String) b.get("date")))
+              .collect(Collectors.toList());
 
-      userService.deleteUser(targetUser);
-
-      return ResponseEntity.ok(Map.of("message", "User deleted successfully"));
+      return ResponseEntity.ok(messageStats);
     } catch (SecurityException e) {
       return ResponseEntity.status(401).body(e.getMessage());
     } catch (Exception e) {

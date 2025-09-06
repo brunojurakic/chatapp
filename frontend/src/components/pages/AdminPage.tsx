@@ -9,7 +9,15 @@ import {
   SystemStats,
   UserManagement,
   DeleteUserModal,
+  MessageChart,
 } from "@/components/admin"
+
+interface SystemStatsData {
+  totalUsers: number
+  adminUsers: number
+  regularUsers: number
+  totalMessages: number
+}
 
 interface User {
   id?: string
@@ -28,17 +36,17 @@ interface Role {
   description: string
 }
 
-interface SystemStats {
-  totalUsers: number
-  adminUsers: number
-  regularUsers: number
+interface MessageData {
+  date: string
+  count: number
 }
 
 const AdminPage = () => {
   const { user: currentUser } = useAuth()
   const [users, setUsers] = useState<User[]>([])
   const [roles, setRoles] = useState<Role[]>([])
-  const [stats, setStats] = useState<SystemStats | null>(null)
+  const [stats, setStats] = useState<SystemStatsData | null>(null)
+  const [messageData, setMessageData] = useState<MessageData[]>([])
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [roleActionLoading, setRoleActionLoading] = useState<{
@@ -49,7 +57,7 @@ const AdminPage = () => {
   const [modalMounted, setModalMounted] = useState(false)
   const [modalEntered, setModalEntered] = useState(false)
   const [activeTab, setActiveTab] = useState<string>(
-    localStorage.getItem('adminTab') || 'overview'
+    localStorage.getItem("adminTab") || "overview",
   )
   const timeoutRef = useRef<number | null>(null)
 
@@ -57,10 +65,11 @@ const AdminPage = () => {
     fetchUsers()
     fetchRoles()
     fetchStats()
+    fetchMessageStats()
   }, [])
 
   useEffect(() => {
-    localStorage.setItem('adminTab', activeTab)
+    localStorage.setItem("adminTab", activeTab)
   }, [activeTab])
 
   const fetchUsers = async () => {
@@ -104,6 +113,22 @@ const AdminPage = () => {
       errorUtils.handleApiError("Fetch stats", error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchMessageStats = async () => {
+    try {
+      const response = await apiUtils.authenticatedRequest(
+        "/api/admin/message-stats?days=90",
+      )
+      if (response.ok) {
+        const messageStatsData = await response.json()
+        setMessageData(messageStatsData)
+      } else {
+        toast.error("Failed to fetch message stats")
+      }
+    } catch (error) {
+      errorUtils.handleApiError("Fetch message stats", error)
     }
   }
 
@@ -233,7 +258,11 @@ const AdminPage = () => {
           </p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="space-y-6"
+        >
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="users">User Management</TabsTrigger>
@@ -241,6 +270,7 @@ const AdminPage = () => {
 
           <TabsContent value="overview" className="space-y-6">
             <SystemStats stats={stats} />
+            <MessageChart data={messageData} />
           </TabsContent>
 
           <TabsContent value="users" className="space-y-6">
