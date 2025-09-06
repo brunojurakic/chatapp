@@ -48,6 +48,9 @@ const AdminPage = () => {
   const [confirmUserId, setConfirmUserId] = useState<string | null>(null)
   const [modalMounted, setModalMounted] = useState(false)
   const [modalEntered, setModalEntered] = useState(false)
+  const [activeTab, setActiveTab] = useState<string>(
+    localStorage.getItem('adminTab') || 'overview'
+  )
   const timeoutRef = useRef<number | null>(null)
 
   useEffect(() => {
@@ -55,6 +58,10 @@ const AdminPage = () => {
     fetchRoles()
     fetchStats()
   }, [])
+
+  useEffect(() => {
+    localStorage.setItem('adminTab', activeTab)
+  }, [activeTab])
 
   const fetchUsers = async () => {
     try {
@@ -226,7 +233,7 @@ const AdminPage = () => {
           </p>
         </div>
 
-        <Tabs defaultValue="overview" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="users">User Management</TabsTrigger>
