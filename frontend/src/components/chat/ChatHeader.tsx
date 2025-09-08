@@ -9,7 +9,7 @@ import {
   StepBack,
   StepForward,
 } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { Input } from "../ui/input"
 
 interface Participant {
@@ -48,6 +48,30 @@ export function ChatHeader({
 }: ChatHeaderProps) {
   const [input, setInput] = useState("")
   const [showMobileSearch, setShowMobileSearch] = useState(false)
+  const desktopSearchRef = useRef<HTMLInputElement>(null)
+  const mobileSearchRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.altKey && event.key === "f") {
+        event.preventDefault()
+
+        if (window.innerWidth >= 768) {
+          desktopSearchRef.current?.focus()
+        } else {
+          if (!showMobileSearch) {
+            setShowMobileSearch(true)
+          }
+          setTimeout(() => {
+            mobileSearchRef.current?.focus()
+          }, 100)
+        }
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [showMobileSearch])
   useEffect(() => {
     if (!matchesCount) return
   }, [matchesCount])
@@ -98,6 +122,7 @@ export function ChatHeader({
         <div className="hidden md:flex items-center gap-2">
           <div className="relative flex items-center">
             <Input
+              ref={desktopSearchRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               type="search"
@@ -164,6 +189,7 @@ export function ChatHeader({
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <Input
+                  ref={mobileSearchRef}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   type="search"
