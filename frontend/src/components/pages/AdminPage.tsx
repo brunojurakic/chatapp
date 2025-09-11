@@ -10,6 +10,7 @@ import {
   UserManagement,
   DeleteUserModal,
   MessageChart,
+  ActivityLogs,
 } from "@/components/admin"
 
 interface SystemStatsData {
@@ -263,9 +264,10 @@ const AdminPage = () => {
           onValueChange={setActiveTab}
           className="space-y-6"
         >
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="users">User Management</TabsTrigger>
+            <TabsTrigger value="logs">Activity Logs</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -283,6 +285,10 @@ const AdminPage = () => {
               onToggleRole={toggleRole}
               onDeleteUser={deleteUser}
             />
+          </TabsContent>
+
+          <TabsContent value="logs" className="space-y-6">
+            <ActivityLogs limit={100} />
           </TabsContent>
         </Tabs>
       </div>

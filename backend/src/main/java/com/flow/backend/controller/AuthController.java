@@ -27,6 +27,8 @@ public class AuthController {
 
   @Autowired private UserUtil userUtil;
 
+  @Autowired private com.flow.backend.service.ActivityLogService activityLogService;
+
   @GetMapping("/user")
   public ResponseEntity<?> getUser(
       @RequestHeader(value = "Authorization", required = false) String authHeader) {
@@ -48,6 +50,11 @@ public class AuthController {
               user != null && user.getDisplayName() != null ? user.getDisplayName() : claims.name,
               user != null ? user.getThemePreference() : "system",
               user != null ? roleService.getUserRoles(user) : Set.of("REGULAR"));
+
+      if (user != null) {
+        activityLogService.logActivity(user, "LOGIN", "User logged in to the application");
+      }
+
       return ResponseEntity.ok(userDTO);
     } catch (SecurityException e) {
       return ResponseEntity.status(401).body(e.getMessage());
@@ -57,7 +64,20 @@ public class AuthController {
   }
 
   @PostMapping("/logout")
-  public ResponseEntity<?> logout() {
+  public ResponseEntity<?> logout(
+      @RequestHeader(value = "Authorization", required = false) String authHeader) {
+    try {
+      if (authHeader != null) {
+        AuthUtil.JwtClaims claims = authUtil.extractClaimsFromToken(authHeader);
+        User user = userService.findByEmail(claims.email).orElse(null);
+        if (user != null) {
+          activityLogService.logActivity(user, "LOGOUT", "User logged out of the application");
+        }
+      }
+    } catch (Exception e) {
+      System.err.println("Error logging logout activity: " + e.getMessage());
+    }
+
     return ResponseEntity.ok().body("Logged out successfully");
   }
 }
