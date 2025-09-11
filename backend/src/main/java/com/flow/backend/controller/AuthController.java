@@ -1,7 +1,12 @@
 package com.flow.backend.controller;
 
+import com.flow.backend.dto.UserDTO;
+import com.flow.backend.model.User;
+import com.flow.backend.service.RoleService;
+import com.flow.backend.service.UserService;
+import com.flow.backend.util.AuthUtil;
+import com.flow.backend.util.UserUtil;
 import java.util.Set;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,13 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.flow.backend.dto.UserDTO;
-import com.flow.backend.model.User;
-import com.flow.backend.service.RoleService;
-import com.flow.backend.service.UserService;
-import com.flow.backend.util.AuthUtil;
-import com.flow.backend.util.UserUtil;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -55,7 +53,8 @@ public class AuthController {
 
       if (user != null) {
         java.time.Instant fiveMinutesAgo = java.time.Instant.now().minusSeconds(300);
-        boolean shouldLogLogin = user.getLastLoginAt() == null || user.getLastLoginAt().isBefore(fiveMinutesAgo);
+        boolean shouldLogLogin =
+            user.getLastLoginAt() == null || user.getLastLoginAt().isBefore(fiveMinutesAgo);
 
         if (shouldLogLogin) {
           activityLogService.logActivity(user, "LOGIN", "User logged in to the application");

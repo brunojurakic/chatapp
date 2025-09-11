@@ -162,7 +162,7 @@ export function ActivityLogs({ limit = 50 }: ActivityLogsProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-6">
+      <div className="flex items-center gap-2 mb-4 sm:mb-6">
         <Activity className="h-5 w-5 text-primary" />
         <h3 className="text-lg font-semibold">Activity Timeline</h3>
         <span className="text-sm text-muted-foreground">
@@ -179,23 +179,25 @@ export function ActivityLogs({ limit = 50 }: ActivityLogsProps) {
           {logs.map((log) => (
             <div
               key={log.id}
-              className="flex gap-4 p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+              className="flex gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
             >
               <div className="flex-shrink-0">
-                <div className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-muted/50 flex items-center justify-center">
                   {getActionIcon(log.action)}
                 </div>
               </div>
 
               <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium text-sm truncate">
-                        {log.userName}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
+                      <div className="flex items-center gap-1.5">
+                        <User className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
+                        <span className="font-medium text-sm sm:text-base truncate">
+                          {log.userName}
+                        </span>
+                      </div>
+                      <span className="text-xs text-muted-foreground hidden sm:inline">
                         ({log.userEmail})
                       </span>
                     </div>
@@ -210,12 +212,12 @@ export function ActivityLogs({ limit = 50 }: ActivityLogsProps) {
                       </span>
                     </div>
 
-                    <p className="text-sm text-foreground mb-2">
+                    <p className="text-sm text-foreground mb-2 leading-relaxed">
                       {log.description}
                     </p>
 
                     {log.ipAddress && (
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-xs text-muted-foreground hidden sm:block">
                         IP: {log.ipAddress}
                       </div>
                     )}
@@ -223,7 +225,9 @@ export function ActivityLogs({ limit = 50 }: ActivityLogsProps) {
 
                   <div className="flex items-center gap-1 text-xs text-muted-foreground flex-shrink-0">
                     <Clock className="h-3 w-3" />
-                    {formatTimestamp(log.createdAt)}
+                    <span className="whitespace-nowrap">
+                      {formatTimestamp(log.createdAt)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -236,7 +240,7 @@ export function ActivityLogs({ limit = 50 }: ActivityLogsProps) {
         <div className="text-center pt-4">
           <button
             onClick={() => fetchActivityLogs()}
-            className="text-sm text-primary hover:underline"
+            className="text-sm text-primary hover:underline px-4 py-2 min-h-[44px] sm:min-h-0"
           >
             Load more activity...
           </button>
