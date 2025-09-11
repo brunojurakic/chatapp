@@ -179,7 +179,7 @@ export function ActivityLogs({ limit = 50 }: ActivityLogsProps) {
           {logs.map((log) => (
             <div
               key={log.id}
-              className="flex gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+              className="flex gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors duration-50"
             >
               <div className="flex-shrink-0">
                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-muted/50 flex items-center justify-center">
