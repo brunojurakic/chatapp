@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react"
 import Header from "../header"
 import { apiUtils, errorUtils } from "@/utils/apiUtils"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Loader2 } from "lucide-react"
+import { Loader2, BarChart3, Users, Activity } from "lucide-react"
 import { toast } from "sonner"
 import { useAuth } from "@/hooks/use-auth"
 import {
@@ -265,9 +265,18 @@ const AdminPage = () => {
           className="space-y-6"
         >
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="users">User Management</TabsTrigger>
-            <TabsTrigger value="logs">Activity Logs</TabsTrigger>
+            <TabsTrigger value="overview" className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4 sm:hidden" />
+              <span className="hidden sm:inline">Overview</span>
+            </TabsTrigger>
+            <TabsTrigger value="users" className="flex items-center gap-2">
+              <Users className="h-4 w-4 sm:hidden" />
+              <span className="hidden sm:inline">User Management</span>
+            </TabsTrigger>
+            <TabsTrigger value="logs" className="flex items-center gap-2">
+              <Activity className="h-4 w-4 sm:hidden" />
+              <span className="hidden sm:inline">Activity Logs</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
