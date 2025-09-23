@@ -277,6 +277,13 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
       stopTyping()
       setIsCurrentUserTyping(false)
       setInput("")
+
+      setTimeout(() => {
+        const c = scrollContainerRef.current
+        if (c) {
+          c.scrollTo({ top: c.scrollHeight, behavior: "smooth" })
+        }
+      }, 100)
     } catch (err) {
       console.warn(err)
       toast.error("Could not send message")
@@ -329,13 +336,12 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
 
     const c = scrollContainerRef.current
     if (!c) return
-    const behavior = didInitialScrollRef.current
-      ? ("smooth" as const)
-      : ("auto" as const)
-    c.scrollTo({ top: c.scrollHeight, behavior })
-    didInitialScrollRef.current = true
 
-    markMessagesAsRead()
+    if (!didInitialScrollRef.current && messages.length > 0) {
+      c.scrollTo({ top: c.scrollHeight, behavior: "auto" })
+      didInitialScrollRef.current = true
+      markMessagesAsRead()
+    }
   }, [messages.length, searchResults, markMessagesAsRead])
 
   return (
