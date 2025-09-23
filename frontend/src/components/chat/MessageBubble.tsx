@@ -168,11 +168,11 @@ export function MessageBubble({
             role="article"
           >
             <div className="flex items-center justify-end gap-1">
-              <div className="flex-1">
-                {renderHighlighted(message.content)}
-              </div>
+              <div className="flex-1">{renderHighlighted(message.content)}</div>
               {isMe && (
-                <CheckCheck className={`ml-1 h-4 w-4 flex-shrink-0 ${message.readAt ? 'text-blue-500' : 'text-muted-foreground'}`} />
+                <CheckCheck
+                  className={`ml-1 h-4 w-4 flex-shrink-0 ${message.readAt ? "text-blue-500" : "text-muted-foreground"}`}
+                />
               )}
             </div>
           </div>

@@ -43,9 +43,46 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const didInitialScrollRef = useRef(false)
 
-  const handleMessageReceived = useCallback((message: Message) => {
-    setMessages((prev) => [...prev, message])
-  }, [])
+  const markMessagesAsReadUpTo = useCallback(
+    async (beforeTimestamp: string) => {
+      if (!tokenUtils.exists()) return
+
+      try {
+        const res = await apiUtils.authenticatedRequest(
+          `/api/chats/${conversationId}/mark-read?before=${encodeURIComponent(beforeTimestamp)}`,
+          {
+            method: "POST",
+          },
+        )
+
+        if (res.ok) {
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.senderId !== currentUserId &&
+              !msg.readAt &&
+              new Date(msg.createdAt) <= new Date(beforeTimestamp)
+                ? { ...msg, readAt: new Date().toISOString() }
+                : msg,
+            ),
+          )
+        }
+      } catch (err) {
+        console.warn("Failed to mark messages as read:", err)
+      }
+    },
+    [currentUserId, conversationId],
+  )
+
+  const handleMessageReceived = useCallback(
+    (message: Message) => {
+      setMessages((prev) => [...prev, message])
+
+      if (message.senderId !== currentUserId) {
+        markMessagesAsReadUpTo(message.createdAt)
+      }
+    },
+    [currentUserId, markMessagesAsReadUpTo],
+  )
 
   const handleTypingEvent = useCallback(
     (event: TypingEvent) => {
