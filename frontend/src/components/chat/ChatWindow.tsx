@@ -18,6 +18,8 @@ import {
 } from "@/utils/websocket"
 import { useTypingIndicator } from "@/hooks/useTypingIndicator"
 import { tokenUtils, apiUtils } from "@/utils/apiUtils"
+import { ChevronDown } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 export function ChatRoom({ conversationId }: { conversationId: string }) {
   const { user } = useAuth()
@@ -38,10 +40,38 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
   const [uploadLoading, setUploadLoading] = useState(false)
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set())
   const [isCurrentUserTyping, setIsCurrentUserTyping] = useState(false)
+  const [showScrollButton, setShowScrollButton] = useState(false)
 
   const wsManagerRef = useRef<ChatWebSocketManager | null>(null)
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const didInitialScrollRef = useRef(false)
+  const isAtBottomRef = useRef(true)
+
+  const scrollToBottom = useCallback(() => {
+    const c = scrollContainerRef.current
+    if (c) {
+      c.scrollTo({ top: c.scrollHeight, behavior: "smooth" })
+      isAtBottomRef.current = true
+      setShowScrollButton(false)
+    }
+  }, [])
+
+  const handleScroll = useCallback(() => {
+    const c = scrollContainerRef.current
+    if (!c) return
+
+    const isAtBottomNow = c.scrollTop + c.clientHeight >= c.scrollHeight - 100
+    setShowScrollButton(!isAtBottomNow)
+    isAtBottomRef.current = isAtBottomNow
+  }, [])
+
+  useEffect(() => {
+    const c = scrollContainerRef.current
+    if (c) {
+      c.addEventListener("scroll", handleScroll)
+      return () => c.removeEventListener("scroll", handleScroll)
+    }
+  }, [handleScroll])
 
   const markMessagesAsReadUpTo = useCallback(
     async (beforeTimestamp: string) => {
@@ -80,6 +110,15 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
       if (message.senderId !== currentUserId) {
         markMessagesAsReadUpTo(message.createdAt)
       }
+
+      setTimeout(() => {
+        if (isAtBottomRef.current) {
+          const c = scrollContainerRef.current
+          if (c) {
+            c.scrollTo({ top: c.scrollHeight, behavior: "smooth" })
+          }
+        }
+      }, 100)
     },
     [currentUserId, markMessagesAsReadUpTo],
   )
@@ -319,6 +358,8 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
         const c = scrollContainerRef.current
         if (c) {
           c.scrollTo({ top: c.scrollHeight, behavior: "smooth" })
+          isAtBottomRef.current = true
+          setShowScrollButton(false)
         }
       }, 100)
     } catch (err) {
@@ -382,7 +423,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
   }, [messages.length, searchResults, markMessagesAsRead])
 
   return (
-    <div className="h-full w-full bg-background dark:bg-background">
+    <div className="h-full w-full bg-background dark:bg-background relative">
       <div className="flex h-full w-full flex-col border-0 rounded-none bg-transparent py-0 gap-0">
         <ChatHeader
           participant={participant}
@@ -404,6 +445,18 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
           currentDisplayName={currentDisplayName}
           currentUsername={currentUsername}
         />
+
+        {showScrollButton && (
+          <div className="absolute bottom-20 right-4 z-10">
+            <Button
+              onClick={scrollToBottom}
+              size="sm"
+              className="rounded-full shadow-lg bg-primary hover:bg-primary/90"
+            >
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
 
         <ChatInput
           input={input}
