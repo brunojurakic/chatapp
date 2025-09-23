@@ -31,6 +31,11 @@ A full‑stack chat application under active development. Current features inclu
 - Real-time typing indicators
   - Clients show when the other user is typing using STOMP events
 
+- Read receipts
+  - Messages show read status with checkmarks
+  - Automatic marking as read when viewing messages
+  - Real-time read status updates between users
+
 - Theming and user theme sync
   - Light/dark theme support
   - User theme is synced across devices/accounts
