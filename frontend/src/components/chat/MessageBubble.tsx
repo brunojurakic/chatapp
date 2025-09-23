@@ -152,7 +152,7 @@ export function MessageBubble({
               isMe={isMe}
             />
             {message.content ? (
-              <div className="mt-2 block max-w-[min(100%,72ch)] text-[13px] leading-relaxed whitespace-pre-wrap break-words text-muted-foreground">
+              <div className="mt-2 block max-w-[min(100%,72ch)] text-[13px] leading-relaxed whitespace-pre-wrap break-all overflow-wrap-anywhere text-muted-foreground">
                 {renderHighlighted(message.content)}
               </div>
             ) : null}
@@ -160,7 +160,7 @@ export function MessageBubble({
         ) : (
           <div
             className={
-              `block max-w-[min(100%,72ch)] rounded-md px-3 py-2 text-[13px] leading-relaxed whitespace-pre-wrap break-words ` +
+              `block max-w-[min(100%,72ch)] rounded-md px-3 py-2 text-[13px] leading-relaxed whitespace-pre-wrap break-all overflow-wrap-anywhere ` +
               (isMe
                 ? "bg-emerald-100 text-slate-900 dark:bg-emerald-950 dark:text-slate-100 text-right"
                 : "bg-zinc-200 dark:bg-neutral-900 text-foreground text-left")
