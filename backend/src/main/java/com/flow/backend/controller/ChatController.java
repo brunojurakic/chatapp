@@ -189,4 +189,46 @@ public class ChatController {
       return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
     }
   }
+
+  @PostMapping("/{friendshipId}/mark-read")
+  public ResponseEntity<?> markMessagesAsRead(
+      @RequestHeader(value = "Authorization", required = false) String authHeader,
+      @PathVariable("friendshipId") UUID friendshipId,
+      @RequestParam(value = "before", required = false) String beforeTimestamp) {
+    try {
+      User me = getCurrentUserFromToken(authHeader);
+      if (me == null) return ResponseEntity.status(401).body("Not authenticated");
+
+      java.time.Instant before =
+          beforeTimestamp != null
+              ? java.time.Instant.parse(beforeTimestamp)
+              : java.time.Instant.now();
+
+      int updatedCount = chatService.markMessagesAsRead(friendshipId, me, before);
+
+      if (updatedCount > 0) {
+        Map<String, Object> readReceiptEvent =
+            Map.of(
+                "type", "read_receipt",
+                "friendshipId", friendshipId.toString(),
+                "readerId", me.getId().toString(),
+                "readerName", userDisplayUtil.getDisplayName(me),
+                "readAt", before.toString(),
+                "updatedCount", updatedCount);
+
+        try {
+          messagingTemplate.convertAndSend(
+              "/topic/chats/" + friendshipId.toString(), readReceiptEvent);
+        } catch (MessagingException e) {
+          System.err.println("Failed to broadcast read receipt: " + e.getMessage());
+        }
+      }
+
+      return ResponseEntity.ok(Map.of("updatedCount", updatedCount));
+    } catch (IllegalArgumentException ia) {
+      return ResponseEntity.badRequest().body(Map.of("error", ia.getMessage()));
+    } catch (Exception e) {
+      return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+    }
+  }
 }

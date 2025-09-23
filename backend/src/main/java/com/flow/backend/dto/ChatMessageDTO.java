@@ -14,6 +14,7 @@ public class ChatMessageDTO {
   private String attachmentUrl;
   private String attachmentType;
   private String attachmentName;
+  private Instant readAt;
 
   public ChatMessageDTO() {}
 
@@ -35,6 +36,7 @@ public class ChatMessageDTO {
     this.attachmentUrl = null;
     this.attachmentType = null;
     this.attachmentName = null;
+    this.readAt = null;
   }
 
   public ChatMessageDTO(
@@ -47,7 +49,8 @@ public class ChatMessageDTO {
       Instant createdAt,
       String attachmentUrl,
       String attachmentType,
-      String attachmentName) {
+      String attachmentName,
+      Instant readAt) {
     this.id = id;
     this.friendshipId = friendshipId;
     this.senderId = senderId;
@@ -58,6 +61,7 @@ public class ChatMessageDTO {
     this.attachmentUrl = attachmentUrl;
     this.attachmentType = attachmentType;
     this.attachmentName = attachmentName;
+    this.readAt = readAt;
   }
 
   public UUID getId() {
@@ -138,5 +142,13 @@ public class ChatMessageDTO {
 
   public void setAttachmentName(String attachmentName) {
     this.attachmentName = attachmentName;
+  }
+
+  public Instant getReadAt() {
+    return readAt;
+  }
+
+  public void setReadAt(Instant readAt) {
+    this.readAt = readAt;
   }
 }

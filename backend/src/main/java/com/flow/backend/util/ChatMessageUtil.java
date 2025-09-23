@@ -25,7 +25,8 @@ public class ChatMessageUtil {
         message.getCreatedAt(),
         message.getAttachmentUrl(),
         message.getAttachmentType(),
-        message.getAttachmentName());
+        message.getAttachmentName(),
+        message.getReadAt());
   }
 
   public ChatMessageDTO createChatMessageDTO(ChatMessage message, UUID friendshipId) {
@@ -44,6 +45,7 @@ public class ChatMessageUtil {
         message.getCreatedAt(),
         message.getAttachmentUrl(),
         message.getAttachmentType(),
-        message.getAttachmentName());
+        message.getAttachmentName(),
+        message.getReadAt());
   }
 }

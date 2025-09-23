@@ -32,4 +32,14 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, UUID> 
   @Transactional
   @Query("delete from ChatMessage m where m.sender = :user")
   void deleteByUser(@Param("user") User user);
+
+  @Modifying
+  @Transactional
+  @Query(
+      "update ChatMessage m set m.readAt = :readAt where m.friendship = :friendship and m.sender = :sender and m.readAt is null and m.createdAt <= :before")
+  int markMessagesAsRead(
+      @Param("friendship") Friendship friendship,
+      @Param("sender") User sender,
+      @Param("readAt") java.time.Instant readAt,
+      @Param("before") java.time.Instant before);
 }

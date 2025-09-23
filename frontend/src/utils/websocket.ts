@@ -6,8 +6,18 @@ import type { Message, TypingEvent } from "@/types/chat"
 export interface WebSocketCallbacks {
   onMessageReceived: (message: Message) => void
   onTypingEvent: (event: TypingEvent) => void
+  onReadReceipt: (event: ReadReceiptEvent) => void
   onConnectionChange: (connected: boolean) => void
   onError: (error: string) => void
+}
+
+export interface ReadReceiptEvent {
+  type: "read_receipt"
+  friendshipId: string
+  readerId: string
+  readerName: string
+  readAt: string
+  updatedCount: number
 }
 
 interface StompSubscription {
@@ -90,8 +100,13 @@ export class ChatWebSocketManager {
         `/topic/chats/${this.conversationId}`,
         (msg) => {
           try {
-            const message = JSON.parse(msg.body) as Message
-            this.callbacks.onMessageReceived(message)
+            const data = JSON.parse(msg.body)
+
+            if (data.type === "read_receipt") {
+              this.callbacks.onReadReceipt(data as ReadReceiptEvent)
+            } else {
+              this.callbacks.onMessageReceived(data as Message)
+            }
           } catch (err) {
             console.warn("Failed to parse message", err)
           }

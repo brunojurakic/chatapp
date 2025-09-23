@@ -136,4 +136,22 @@ public class ChatService {
     ChatMessage saved = chatMessageRepository.save(m);
     return chatMessageUtil.createChatMessageDTO(saved, f);
   }
+
+  @Transactional
+  public int markMessagesAsRead(UUID friendshipId, User reader, java.time.Instant before) {
+    Optional<Friendship> fOpt = friendshipRepository.findById(friendshipId);
+    if (fOpt.isEmpty()) throw new IllegalArgumentException("Conversation not found");
+    Friendship f = fOpt.get();
+
+    if (!f.getUserA().getId().equals(reader.getId())
+        && !f.getUserB().getId().equals(reader.getId())) {
+      throw new IllegalArgumentException("Not participant");
+    }
+
+    User otherParticipant =
+        f.getUserA().getId().equals(reader.getId()) ? f.getUserB() : f.getUserA();
+
+    return chatMessageRepository.markMessagesAsRead(
+        f, otherParticipant, java.time.Instant.now(), before);
+  }
 }

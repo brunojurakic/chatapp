@@ -11,7 +11,11 @@ import { ChatHeader } from "./ChatHeader"
 import { MessageList } from "./MessageList"
 import { ChatInput } from "./ChatInput"
 import type { Message, Participant, TypingEvent } from "@/types/chat"
-import { ChatWebSocketManager, fetchChatData } from "@/utils/websocket"
+import {
+  ChatWebSocketManager,
+  fetchChatData,
+  type ReadReceiptEvent,
+} from "@/utils/websocket"
 import { useTypingIndicator } from "@/hooks/useTypingIndicator"
 import { tokenUtils, apiUtils } from "@/utils/apiUtils"
 
@@ -64,6 +68,21 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
     setConnected(isConnected)
   }, [])
 
+  const handleReadReceipt = useCallback(
+    (event: ReadReceiptEvent) => {
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.senderId === currentUserId &&
+          !msg.readAt &&
+          new Date(msg.createdAt) <= new Date(event.readAt)
+            ? { ...msg, readAt: event.readAt }
+            : msg,
+        ),
+      )
+    },
+    [currentUserId],
+  )
+
   const handleError = useCallback((error: string) => {
     toast.error(error)
   }, [])
@@ -95,6 +114,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
     wsManagerRef.current = new ChatWebSocketManager(conversationId, token, {
       onMessageReceived: handleMessageReceived,
       onTypingEvent: handleTypingEvent,
+      onReadReceipt: handleReadReceipt,
       onConnectionChange: handleConnectionChange,
       onError: handleError,
     })
@@ -110,6 +130,7 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
     currentUserId,
     handleMessageReceived,
     handleTypingEvent,
+    handleReadReceipt,
     handleConnectionChange,
     handleError,
   ])
@@ -190,6 +211,42 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
     const el = document.getElementById(`message-${id}`)
     el?.scrollIntoView({ behavior: "smooth", block: "center" })
   }
+
+  const markMessagesAsRead = useCallback(async () => {
+    if (!tokenUtils.exists() || messages.length === 0) return
+
+    try {
+      const latestOtherMessage = messages
+        .filter((msg) => msg.senderId !== currentUserId)
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        )[0]
+
+      if (!latestOtherMessage) return
+
+      const res = await apiUtils.authenticatedRequest(
+        `/api/chats/${conversationId}/mark-read?before=${encodeURIComponent(latestOtherMessage.createdAt)}`,
+        {
+          method: "POST",
+        },
+      )
+
+      if (res.ok) {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.senderId !== currentUserId &&
+            !msg.readAt &&
+            new Date(msg.createdAt) <= new Date(latestOtherMessage.createdAt)
+              ? { ...msg, readAt: new Date().toISOString() }
+              : msg,
+          ),
+        )
+      }
+    } catch (err) {
+      console.warn("Failed to mark messages as read:", err)
+    }
+  }, [messages, currentUserId, conversationId])
 
   const retryConnect = () => {
     if (!tokenUtils.exists()) {
@@ -277,7 +334,9 @@ export function ChatRoom({ conversationId }: { conversationId: string }) {
       : ("auto" as const)
     c.scrollTo({ top: c.scrollHeight, behavior })
     didInitialScrollRef.current = true
-  }, [messages.length, searchResults])
+
+    markMessagesAsRead()
+  }, [messages.length, searchResults, markMessagesAsRead])
 
   return (
     <div className="h-full w-full bg-background dark:bg-background">

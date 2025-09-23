@@ -8,6 +8,7 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 import type { Message } from "@/types/chat"
 import { ImageAttachmentWithModal } from "./ImageAttachmentWithModal"
 import { FileAttachment } from "./FileAttachment"
+import { Check, CheckCheck } from "lucide-react"
 
 interface MessageBubbleProps {
   message: Message
@@ -167,6 +168,15 @@ export function MessageBubble({
             role="article"
           >
             {renderHighlighted(message.content)}
+            {isMe && (
+              <div className="flex justify-end mt-1">
+                {message.readAt ? (
+                  <CheckCheck className="h-3 w-3 text-blue-500" />
+                ) : (
+                  <Check className="h-3 w-3 text-muted-foreground" />
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>

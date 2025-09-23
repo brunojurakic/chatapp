@@ -9,6 +9,7 @@ export interface Message {
   attachmentType?: string
   attachmentName?: string
   createdAt: string
+  readAt?: string
 }
 
 export interface Participant {

@@ -44,6 +44,9 @@ public class ChatMessage {
   @Column(name = "created_at", nullable = false)
   private Instant createdAt;
 
+  @Column(name = "read_at")
+  private Instant readAt;
+
   @PrePersist
   protected void onCreate() {
     createdAt = Instant.now();
@@ -126,6 +129,14 @@ public class ChatMessage {
 
   public void setAttachmentName(String attachmentName) {
     this.attachmentName = attachmentName;
+  }
+
+  public Instant getReadAt() {
+    return readAt;
+  }
+
+  public void setReadAt(Instant readAt) {
+    this.readAt = readAt;
   }
 
   public Instant getCreatedAt() {
