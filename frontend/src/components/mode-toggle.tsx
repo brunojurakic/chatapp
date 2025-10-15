@@ -1,4 +1,5 @@
 import { Moon, Sun } from "lucide-react"
+import { useCallback, useRef } from "react"
 
 import { Button } from "@/components/ui/button"
 import { useTheme } from "@/hooks/use-theme"
@@ -11,18 +12,12 @@ export function ModeToggle() {
   const { theme, setTheme } = useTheme()
   const { user, refreshUser } = useAuth()
   const location = useLocation()
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  const toggleTheme = async () => {
-    const newTheme = theme === "light" ? "dark" : "light"
-    
-    if (location.pathname === "/login" || !user) {
-      setTheme(newTheme)
-      return
-    }
-    
+  const saveThemeToServer = useCallback(async (themeToSave: string) => {
     try {
       const formData = new FormData()
-      formData.append("themePreference", newTheme)
+      formData.append("themePreference", themeToSave)
 
       const response = await apiUtils.authenticatedRequest(
         "/api/user/settings",
@@ -33,7 +28,6 @@ export function ModeToggle() {
       )
 
       if (response.ok) {
-        setTheme(newTheme)
         await refreshUser()
       } else {
         toast.error("Failed to save theme preference")
@@ -42,6 +36,25 @@ export function ModeToggle() {
       console.error("Failed to update theme preference:", error)
       toast.error("Failed to save theme preference")
     }
+  }, [refreshUser])
+
+  const toggleTheme = () => {
+    const newTheme = theme === "light" ? "dark" : "light"
+    
+    if (location.pathname === "/login" || !user) {
+      setTheme(newTheme)
+      return
+    }
+
+    setTheme(newTheme)
+
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current)
+    }
+
+    debounceTimeoutRef.current = setTimeout(() => {
+      saveThemeToServer(newTheme)
+    }, 500) // 500ms debounce delay
   }
 
   return (
