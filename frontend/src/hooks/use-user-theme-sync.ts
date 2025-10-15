@@ -4,10 +4,14 @@ import { useTheme } from "./use-theme"
 
 export const useUserThemeSync = () => {
   const { user } = useAuth()
-  const { setTheme } = useTheme()
+  const { setTheme, pendingTheme } = useTheme()
   const hasSetInitialTheme = useRef(false)
 
   useEffect(() => {
+    if (pendingTheme) {
+      return
+    }
+
     if (user?.themePreference && !hasSetInitialTheme.current) {
       const validThemes = ["light", "dark", "system"]
       if (validThemes.includes(user.themePreference)) {
@@ -19,5 +23,5 @@ export const useUserThemeSync = () => {
     if (!user) {
       hasSetInitialTheme.current = false
     }
-  }, [user?.themePreference, user, setTheme])
+  }, [user?.themePreference, user, setTheme, pendingTheme])
 }

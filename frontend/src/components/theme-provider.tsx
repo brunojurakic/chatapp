@@ -11,11 +11,15 @@ type ThemeProviderProps = {
 type ThemeProviderState = {
   theme: Theme
   setTheme: (theme: Theme) => void
+  pendingTheme: Theme | null
+  setPendingTheme: (theme: Theme | null) => void
 }
 
 const initialState: ThemeProviderState = {
   theme: "system",
   setTheme: () => null,
+  pendingTheme: null,
+  setPendingTheme: () => null,
 }
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
@@ -31,6 +35,7 @@ export function ThemeProvider({
   const [theme, setTheme] = useState<Theme>(
     () => (localStorage.getItem(storageKey) as Theme) || defaultTheme,
   )
+  const [pendingTheme, setPendingTheme] = useState<Theme | null>(null)
 
   useEffect(() => {
     const root = window.document.documentElement
@@ -56,6 +61,8 @@ export function ThemeProvider({
       localStorage.setItem(storageKey, theme)
       setTheme(theme)
     },
+    pendingTheme,
+    setPendingTheme,
   }
 
   return (

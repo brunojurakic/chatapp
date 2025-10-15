@@ -9,7 +9,7 @@ import { apiUtils } from "@/utils/apiUtils"
 import { toast } from "sonner"
 
 export function ModeToggle() {
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme, setPendingTheme } = useTheme()
   const { user, refreshUser } = useAuth()
   const location = useLocation()
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -30,15 +30,20 @@ export function ModeToggle() {
 
         if (response.ok) {
           await refreshUser()
+          setPendingTheme(null)
         } else {
+          setTheme(themeToSave === "light" ? "dark" : "light")
+          setPendingTheme(null)
           toast.error("Failed to save theme preference")
         }
       } catch (error) {
         console.error("Failed to update theme preference:", error)
+        setTheme(themeToSave === "light" ? "dark" : "light")
+        setPendingTheme(null)
         toast.error("Failed to save theme preference")
       }
     },
-    [refreshUser],
+    [refreshUser, setPendingTheme, setTheme],
   )
 
   const toggleTheme = () => {
@@ -49,6 +54,7 @@ export function ModeToggle() {
       return
     }
 
+    setPendingTheme(newTheme)
     setTheme(newTheme)
 
     if (debounceTimeoutRef.current) {
