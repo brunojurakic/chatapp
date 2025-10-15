@@ -14,33 +14,36 @@ export function ModeToggle() {
   const location = useLocation()
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  const saveThemeToServer = useCallback(async (themeToSave: string) => {
-    try {
-      const formData = new FormData()
-      formData.append("themePreference", themeToSave)
+  const saveThemeToServer = useCallback(
+    async (themeToSave: string) => {
+      try {
+        const formData = new FormData()
+        formData.append("themePreference", themeToSave)
 
-      const response = await apiUtils.authenticatedRequest(
-        "/api/user/settings",
-        {
-          method: "PUT",
-          body: formData,
-        },
-      )
+        const response = await apiUtils.authenticatedRequest(
+          "/api/user/settings",
+          {
+            method: "PUT",
+            body: formData,
+          },
+        )
 
-      if (response.ok) {
-        await refreshUser()
-      } else {
+        if (response.ok) {
+          await refreshUser()
+        } else {
+          toast.error("Failed to save theme preference")
+        }
+      } catch (error) {
+        console.error("Failed to update theme preference:", error)
         toast.error("Failed to save theme preference")
       }
-    } catch (error) {
-      console.error("Failed to update theme preference:", error)
-      toast.error("Failed to save theme preference")
-    }
-  }, [refreshUser])
+    },
+    [refreshUser],
+  )
 
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light"
-    
+
     if (location.pathname === "/login" || !user) {
       setTheme(newTheme)
       return
