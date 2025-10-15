@@ -3,15 +3,22 @@ import { Moon, Sun } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useTheme } from "@/hooks/use-theme"
 import { useAuth } from "@/hooks/use-auth"
+import { useLocation } from "react-router-dom"
 import { apiUtils } from "@/utils/apiUtils"
 import { toast } from "sonner"
 
 export function ModeToggle() {
   const { theme, setTheme } = useTheme()
-  const { refreshUser } = useAuth()
+  const { user, refreshUser } = useAuth()
+  const location = useLocation()
 
   const toggleTheme = async () => {
     const newTheme = theme === "light" ? "dark" : "light"
+    
+    if (location.pathname === "/login" || !user) {
+      setTheme(newTheme)
+      return
+    }
     
     try {
       const formData = new FormData()
