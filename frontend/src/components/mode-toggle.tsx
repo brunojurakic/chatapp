@@ -2,22 +2,38 @@ import { Moon, Sun } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { useTheme } from "@/hooks/use-theme"
+import { useAuth } from "@/hooks/use-auth"
+import { apiUtils } from "@/utils/apiUtils"
+import { toast } from "sonner"
 
 export function ModeToggle() {
   const { theme, setTheme } = useTheme()
+  const { refreshUser } = useAuth()
 
-  const toggleTheme = () => {
-    if (theme === "light") {
-      setTheme("dark")
-    } else if (theme === "dark") {
-      setTheme("light")
-    } else {
-      // If system, toggle to opposite of current system preference
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light"
-      setTheme(systemTheme === "dark" ? "light" : "dark")
+  const toggleTheme = async () => {
+    const newTheme = theme === "light" ? "dark" : "light"
+    
+    try {
+      const formData = new FormData()
+      formData.append("themePreference", newTheme)
+
+      const response = await apiUtils.authenticatedRequest(
+        "/api/user/settings",
+        {
+          method: "PUT",
+          body: formData,
+        },
+      )
+
+      if (response.ok) {
+        setTheme(newTheme)
+        await refreshUser()
+      } else {
+        toast.error("Failed to save theme preference")
+      }
+    } catch (error) {
+      console.error("Failed to update theme preference:", error)
+      toast.error("Failed to save theme preference")
     }
   }
 
